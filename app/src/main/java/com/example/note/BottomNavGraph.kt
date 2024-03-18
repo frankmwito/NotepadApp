@@ -25,7 +25,7 @@ NavHost(
         composable(route = BottomBarScreen.HOME.route){
             HomeScreen()
         }
-        composable(route = BottomBarScreen.NOTEPAD.route){
+        composable(route = BottomBarScreen.TODOLIST.route){
             Todolist()
         }
         composable(route = BottomBarScreen.SHEDULES.route){

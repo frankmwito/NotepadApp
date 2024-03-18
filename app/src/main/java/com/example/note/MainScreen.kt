@@ -44,7 +44,7 @@ fun mainScreen(){
 fun BottomBar(navController: NavController){
     val screens = listOf(
         BottomBarScreen.HOME,
-        BottomBarScreen.NOTEPAD,
+        BottomBarScreen.TODOLIST,
         BottomBarScreen.SHEDULES,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()

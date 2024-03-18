@@ -13,7 +13,7 @@ enum class BottomBarScreen (
 ) {
 
     HOME("home","Home", Icons.Default.Home),
-    NOTEPAD("Notepad", "Notepad", Icons.Default.NoteAdd),
+    TODOLIST("Todolist", "Todolist", Icons.Default.NoteAdd),
     SHEDULES("Schedules", "Schedules", Icons.Default.Timer);
 
 }

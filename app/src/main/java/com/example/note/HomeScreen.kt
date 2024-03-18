@@ -17,6 +17,7 @@ class HomeScreen : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NoteTheme {
+                mainScreen()
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

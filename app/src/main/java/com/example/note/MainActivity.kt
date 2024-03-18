@@ -1,9 +1,15 @@
 package com.example.note
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,10 +37,14 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.DONUT)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,8 +53,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+@RequiresApi(Build.VERSION_CODES.DONUT)
 @Composable
 fun Splash_Screen() {
+    val context = LocalContext.current
+    val ctx = LocalContext.current
     val scale = remember { androidx.compose.animation.core.Animatable(0f) }
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = !isSystemInDarkTheme()
@@ -53,7 +66,7 @@ fun Splash_Screen() {
         // Update all of the system bar colors to be transparent, and use
         // dark icons if we're in light theme
         systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
+            color = Color.Black,
             darkIcons = useDarkIcons
         )
 
@@ -72,6 +85,13 @@ fun Splash_Screen() {
             )
         )
         delay(3000)
+
+        // Navigate to the main activity
+        val intent = Intent(context.applicationContext, HomeScreen::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        (ctx as Activity).finish()
+
     }
     Box(
         modifier = Modifier
@@ -89,7 +109,8 @@ fun Splash_Screen() {
                 contentDescription = "Splash Icon",
             )
         }
-            Column( modifier = Modifier.fillMaxSize()
+            Column( modifier = Modifier
+                .fillMaxSize()
                 .align(Alignment.BottomCenter)
                 .offset(y = (-45).dp),
                 verticalArrangement = Arrangement.Bottom,
