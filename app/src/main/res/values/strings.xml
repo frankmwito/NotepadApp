@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Note</string>
+    <string name="title_activity_home_screen">HomeScreen</string>
+    <string name="title_activity_todolist">Todolist</string>
+    <string name="title_activity_shedular">shedular</string>
+    <string name="title_activity_register">Register</string>
+    <string name="title_activity_bottom_nav_graph">BottomNavGraph</string>
+    <string name="title_activity_main_screen">MainScreen</string>
 </resources>
