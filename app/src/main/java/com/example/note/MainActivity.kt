@@ -1,19 +1,24 @@
 package com.example.note
 
-import android.graphics.Paint
 import android.os.Bundle
+import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,44 +27,84 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.example.note.ui.theme.NoteTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import kotlinx.coroutines.delay
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.systemuicontroller.SystemUiController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
                 Splash_Screen()
             }
         }
     }
 
 @Composable
-fun Splash_Screen(){
-        Box(
-            modifier = Modifier
-                .background(color = Color.Black)
-                .fillMaxSize(),
+fun Splash_Screen() {
+    val scale = remember { androidx.compose.animation.core.Animatable(0f) }
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !isSystemInDarkTheme()
+
+    DisposableEffect(systemUiController, useDarkIcons) {
+        // Update all of the system bar colors to be transparent, and use
+        // dark icons if we're in light theme
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = useDarkIcons
+        )
+
+        // setStatusBarColor() and setNavigationBarColor() also exist
+
+        onDispose {}
+    }
+    LaunchedEffect(key1 = true){
+        scale.animateTo(
+            targetValue = 1.0f,
+            animationSpec = tween(
+                durationMillis = 500,
+                easing = {
+                    OvershootInterpolator(2f).getInterpolation(it)
+                }
+            )
+        )
+        delay(3000)
+    }
+    Box(
+        modifier = Modifier
+            .background(color = Color.Black)
+            .fillMaxSize(),
+    ) {
+        Column(
+
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
+            Image(
+                painter = painterResource(id = R.drawable.splash),
+                contentDescription = "Splash Icon",
+            )
+        }
+            Column( modifier = Modifier.fillMaxSize()
+                .align(Alignment.BottomCenter)
+                .offset(y = (-45).dp),
+                verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.splash),
-                    contentDescription = "Splash Icon"
-                )
-                Text(text = "NOTEPAD",
+
+            ){
+                Text(
+                    text = "NOTEPAD",
                     fontStyle = FontStyle.Italic,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = Color.White
                 )
             }
-        }
-
+    }
 }
 @Preview(showBackground = true)
 @Composable
