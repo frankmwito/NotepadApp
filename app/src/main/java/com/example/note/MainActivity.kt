@@ -87,7 +87,7 @@ fun Splash_Screen() {
         delay(3000)
 
         // Navigate to the main activity
-        val intent = Intent(context.applicationContext, HomeScreen::class.java)
+        val intent = Intent(context.applicationContext, AppNavigation::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
         (ctx as Activity).finish()

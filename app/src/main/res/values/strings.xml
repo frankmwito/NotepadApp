@@ -6,4 +6,5 @@
     <string name="title_activity_register">Register</string>
     <string name="title_activity_bottom_nav_graph">BottomNavGraph</string>
     <string name="title_activity_main_screen">MainScreen</string>
+    <string name="title_activity_app_navigation">AppNavigation</string>
 </resources>
