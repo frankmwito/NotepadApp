@@ -43,58 +43,12 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun HomeScreen()
-{
-    Surface (
-   modifier = Modifier
-       .fillMaxSize()
-       .background(color = Color.White)
-){
-    Box {
-        Greeting()
-
-        Row (modifier = Modifier
-            .size(40.dp)
-            .background(color = Color.Black)
-            .offset(y = (-45).dp),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Absolute.Right
-        ){
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(imageVector = Icons.Default.Add,
-                    contentDescription = "Add button",
-                    modifier = Modifier.size(35.dp))
-            }
-        }
-
-    }
-}
-}
-
-@Composable
-fun Greeting(){
-    Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
+fun HomeScreen() {
+    Surface(
         modifier = Modifier
-            .padding(15.dp)
+            .fillMaxSize()
+            .background(color = Color.White)
     ) {
-        Column(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = AbsoluteAlignment.Right
-        ) {
-           IconButton(onClick = { /*TODO*/ }) {
-              Icon(imageVector = Icons.Default.FilterList,
-                  contentDescription = "Filter Icon")
-           }
-            Spacer(modifier = Modifier.width(15.dp))
-
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings Icon")
-
-            }
-        }
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
@@ -107,84 +61,87 @@ fun Greeting(){
         val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault())
         val dateString = dateFormat.format(java.util.Date())
 
-        Column {
-            Text(
-                text = greeting,
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
-            )
-            Text(
-                text = dateString,
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
-            )
-            Text(
-                text = "User's Name",
-                fontSize = 18.sp,
-                color = Color.Black,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
-            )
-        }
+        Box(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Text(
+                        text = greeting,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
+                    )
 
+                    Text(
+                        text = "User's Name",
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                    Text(
+                        text = dateString,
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
+                    )
+
+                }
+                Spacer(modifier = Modifier.width(130.dp))
+                Column(
+                    horizontalAlignment = AbsoluteAlignment.Left
+                ) {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filter Icon"
+                        )
+                    }
+                }
+                Column {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings Icon"
+                        )
+
+                    }
+
+                }
+            }
+
+        }
     }
-    Spacer(modifier = Modifier.height(15.dp))
-    Row(
+}
+@Composable
+fun notepad(){
+    Row (
         modifier = Modifier
+            .fillMaxWidth()
             .background(color = Color.Black)
-            .background(
-                color = colors.background,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .fillMaxSize()
-    ) {
-        Column {
+    ){
+        Column(
+             modifier = Modifier.padding(16.dp)
+                ){
             Text(
                 text = "Notepad",
                 fontSize = 24.sp,
-                color = Color.Black,
+                color = Color.White,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif)
         }
+
     }
 }
 
-@Composable
-fun Search(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        // Add the search icon
-        Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = "Search",
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .size(24.dp)
-        )
 
-        // Add the text field
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = { Text("Search notes") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp)
-        )
-    }
-}
