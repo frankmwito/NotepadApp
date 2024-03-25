@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -28,9 +30,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -43,6 +50,22 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
+fun MainScreen() {
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            HomeScreen()
+            
+        }
+    }
+}
+@Composable
 fun HomeScreen() {
     Surface(
         modifier = Modifier
@@ -52,9 +75,9 @@ fun HomeScreen() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
-        val greeting = when {
-            currentHour in 0..11 -> "Good Morning"
-            currentHour in 12..17 -> "Good Afternoon"
+        val greeting = when (currentHour) {
+            in 0..11 -> "Good Morning"
+            in 12..17 -> "Good Afternoon"
             else -> "Good Evening"
         }
 
@@ -96,7 +119,7 @@ fun HomeScreen() {
                     )
 
                 }
-                Spacer(modifier = Modifier.width(130.dp))
+                Spacer(modifier = Modifier.width(110.dp))
                 Column(
                     horizontalAlignment = AbsoluteAlignment.Left
                 ) {
@@ -120,14 +143,29 @@ fun HomeScreen() {
             }
 
         }
+        Row(
+            modifier = Modifier.offset(y = 70.dp)
+            
+        ) {
+            Notepad()
+        }
+
+
+
     }
 }
 @Composable
-fun notepad(){
+fun Notepad(
+    color: Color = Color.Black
+){
     Row (
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
+            .padding(16.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(color)
             .fillMaxWidth()
-            .background(color = Color.Black)
     ){
         Column(
              modifier = Modifier.padding(16.dp)
@@ -143,5 +181,3 @@ fun notepad(){
 
     }
 }
-
-

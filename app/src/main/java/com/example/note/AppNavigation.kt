@@ -76,7 +76,8 @@ fun App_Navigation() {
             startDestination = Screens.HomeScreen.name,
             builder = {
                 composable(route = Screens.HomeScreen.name){
-                    HomeScreen()
+                    MainScreen()
+
                 }
                 composable(route = Screens.TodoList.name){
                     Todolist()
