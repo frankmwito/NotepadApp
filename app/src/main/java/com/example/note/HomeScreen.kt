@@ -8,18 +8,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -44,9 +51,20 @@ fun HomeScreen()
        .background(color = Color.White)
 ){
     Box {
-        Row {
-            Text(text = "Good Morning")
-            Text(text = "User's Name")
+        Greeting()
+
+        Row (modifier = Modifier
+            .size(40.dp)
+            .background(color = Color.Black)
+            .offset(y = (-45).dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Absolute.Right
+        ){
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(imageVector = Icons.Default.Add,
+                    contentDescription = "Add button",
+                    modifier = Modifier.size(35.dp))
+            }
         }
 
     }
@@ -121,16 +139,52 @@ fun Greeting(){
     Row(
         modifier = Modifier
             .background(color = Color.Black)
+            .background(
+                color = colors.background,
+                shape = RoundedCornerShape(10.dp)
+            )
             .fillMaxSize()
     ) {
         Column {
             Text(
                 text = "Notepad",
-                fontSize = 20.sp,
+                fontSize = 24.sp,
                 color = Color.Black,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif)
         }
+    }
+}
+
+@Composable
+fun Search(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Add the search icon
+        Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = "Search",
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .size(24.dp)
+        )
+
+        // Add the text field
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text("Search notes") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        )
     }
 }
