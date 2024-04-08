@@ -1,6 +1,5 @@
 package com.example.note
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,37 +8,31 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialogDefaults.containerColor
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -119,7 +112,7 @@ fun HomeScreen() {
                     )
 
                 }
-                Spacer(modifier = Modifier.width(110.dp))
+                Spacer(modifier = Modifier.width(135.dp))
                 Column(
                     horizontalAlignment = AbsoluteAlignment.Left
                 ) {
@@ -141,43 +134,59 @@ fun HomeScreen() {
 
                 }
             }
+            Row(
+                modifier = Modifier.offset(y = 70.dp)
 
+            ) {
+                Notepad()
+            }
+            Row(
+                modifier = Modifier
+                    .offset(y = 650.dp) // adjust the value to move the FAB up
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(10.dp)),
+                horizontalArrangement = Arrangement.Absolute.Right
+            ) {
+                FloatingActionButton(
+                    onClick = { /* Do something when the FAB is clicked */ },
+                    containerColor = Color.Black,
+                    modifier = Modifier.size(60.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add",
+                        tint = Color.White)
+                }
+            }
         }
+    }
+}
+    @Composable
+    fun Notepad(
+        color: Color = Color.Black
+    ) {
         Row(
-            modifier = Modifier.offset(y = 70.dp)
-            
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(color)
+                .fillMaxWidth()
         ) {
-            Notepad()
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Notepad",
+                    fontSize = 24.sp,
+                    color = Color.White,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif
+                )
+            }
         }
-
-
-
     }
-}
 @Composable
-fun Notepad(
-    color: Color = Color.Black
-){
-    Row (
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .padding(16.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(color)
-            .fillMaxWidth()
-    ){
-        Column(
-             modifier = Modifier.padding(16.dp)
-                ){
-            Text(
-                text = "Notepad",
-                fontSize = 24.sp,
-                color = Color.White,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif)
-        }
+fun Notelist(){
 
-    }
 }
+

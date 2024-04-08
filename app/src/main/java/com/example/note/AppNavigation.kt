@@ -83,7 +83,7 @@ fun App_Navigation() {
                     Todolist()
                 }
                 composable(route = Screens.Shedular.name){
-                    Shedular()
+                    Shedules()
                 }
             })
     }

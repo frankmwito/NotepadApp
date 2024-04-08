@@ -23,7 +23,7 @@ data class NavItem(
             route = Screens.TodoList.name
         ),
         NavItem(
-            label = "Shedular",
+            label = "Schedules",
             icon = Icons.Default.Timer,
             route = Screens.Shedular.name
         )

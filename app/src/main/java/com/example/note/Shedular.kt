@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun Shedular(){
+fun Shedules(){
    Surface (
        modifier = Modifier
            .fillMaxSize()
