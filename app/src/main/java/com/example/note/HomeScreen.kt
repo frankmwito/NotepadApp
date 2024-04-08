@@ -44,6 +44,17 @@ import java.util.Locale
 
 @Composable
 fun MainScreen() {
+    val windowSize = rememberWindowSize()
+    when(windowSize.width){
+        WindowType.Compact -> {
+            CompactMainScreen()
+        } else -> {
+            MediumToExpandedMainScreen()
+        }
+    }
+}
+@Composable
+fun MediumToExpandedMainScreen(){
     Box(
         modifier = Modifier
             .background(Color.White)
@@ -54,7 +65,24 @@ fun MainScreen() {
                 .fillMaxSize()
         ) {
             HomeScreen()
-            
+
+        }
+    }
+}
+
+@Composable
+fun CompactMainScreen(){
+    Box(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            HomeScreen()
+
         }
     }
 }
