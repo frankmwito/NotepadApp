@@ -2,28 +2,36 @@ package com.example.note
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
-
-data class WindowSize(
-    val width: WindowType,
-    val height: WindowType
-)
-enum class WindowType{
-    Compact, Medium, Expanded
-}
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun rememberWindowSize(): WindowSize {
+fun rememberWindowInfo(): WindowInfo {
     val configuration = LocalConfiguration.current
-    return WindowSize(
-        width = when {
-            configuration.smallestScreenWidthDp < 600 -> WindowType.Compact
-            configuration.screenWidthDp < 840 -> WindowType.Medium
-            else -> WindowType.Expanded
+    return WindowInfo(
+        screenWidthInfo = when {
+            configuration.screenWidthDp < 600 -> WindowInfo.WindowType.Compact
+            configuration.screenWidthDp < 840 -> WindowInfo.WindowType.Medium
+            else -> WindowInfo.WindowType.Expanded
         },
-        height = when {
-            configuration.screenHeightDp < 600 -> WindowType.Compact
-            configuration.screenHeightDp < 840 -> WindowType.Medium
-            else -> WindowType.Expanded
-        }
+        screenHeightInfo = when {
+            configuration.screenHeightDp < 480 ->  WindowInfo.WindowType.Compact
+            configuration.screenHeightDp < 900 -> WindowInfo.WindowType.Medium
+            else -> WindowInfo.WindowType.Expanded
+        },
+        screenWidth = configuration.screenWidthDp.dp,
+        screenHeight = configuration.screenHeightDp.dp
     )
+    }
+data class WindowInfo(
+    val screenWidthInfo: WindowType,
+    val screenHeightInfo: WindowType,
+    val screenWidth: Dp,
+    val screenHeight: Dp
+){
+    sealed class WindowType{
+        object Compact: WindowType()
+        object Medium: WindowType()
+        object Expanded: WindowType()
+    }
 }
