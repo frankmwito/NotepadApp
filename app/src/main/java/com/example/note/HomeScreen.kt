@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -61,10 +62,13 @@ class HomeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainScreen()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                MainScreen()
+            }
         }
     }
 }
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
     Column(
@@ -73,6 +77,10 @@ fun MainScreen() {
             .padding(8.dp)
     ) {
         Home_Screen()
+    }
+    Spacer(modifier = Modifier.height( 8.dp))
+    Row {
+        NotesList(viewModel = viewModel())
     }
     // Implement your UI for expanded screens (e.g., tablets in landscape mode or larger devices)
 }
