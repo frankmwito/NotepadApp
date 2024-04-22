@@ -1,6 +1,7 @@
 package com.example.note
 
 //noinspection UsingMaterialAndMaterial3Libraries
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,56 +42,18 @@ import java.util.Locale
 
 @Composable
 fun MainScreen() {
-    val windowInfo = rememberWindowInfo()
-
-    Box(
-        modifier = Modifier
-            .background(Color.White)
-            .fillMaxSize()
-    ) {
-        when (windowInfo.screenWidthInfo) {
-            WindowInfo.WindowType.Compact -> CompactMainScreen(windowInfo)
-            WindowInfo.WindowType.Medium -> MediumMainScreen(windowInfo)
-            WindowInfo.WindowType.Expanded -> ExpandedMainScreen(windowInfo)
-        }
-    }
-}
-
-@Composable
-fun CompactMainScreen(windowInfo: WindowInfo) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        HomeScreen(windowInfo)
-    }
-}
-
-@Composable
-fun MediumMainScreen(windowInfo: WindowInfo) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        HomeScreen(windowInfo)
-    }
-}
-
-@Composable
-fun ExpandedMainScreen(windowInfo: WindowInfo) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-    ) {
-        HomeScreen(windowInfo)
+        HomeScreen()
     }
     // Implement your UI for expanded screens (e.g., tablets in landscape mode or larger devices)
 }
 @Composable
-fun HomeScreen(windowInfo: WindowInfo) {
+fun HomeScreen() {
+    val ctx = LocalContext.current
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -142,7 +106,7 @@ fun HomeScreen(windowInfo: WindowInfo) {
                         )
 
                     }
-                    Spacer(modifier = Modifier.width((-40).dp))
+                    Spacer(modifier = Modifier.width((85).dp))
                     Column(
                         horizontalAlignment = AbsoluteAlignment.Left
                     ) {
@@ -172,13 +136,14 @@ fun HomeScreen(windowInfo: WindowInfo) {
                 }
                 Row(
                     modifier = Modifier
-                        .offset(y = (-100).dp) // adjust the value to move the FAB up
+                        .offset(y = (500).dp) // adjust the value to move the FAB up
                         .fillMaxSize()
                         .clip(RoundedCornerShape(10.dp)),
                     horizontalArrangement = Arrangement.Absolute.Right
                 ) {
                     FloatingActionButton(
-                        onClick = { /* Do something when the FAB is clicked */ },
+                        onClick = {  val intent = Intent(ctx, Notesadd::class.java)
+                            ctx.startActivity(intent) },
                         containerColor = Color.Black,
                         modifier = Modifier.size(60.dp)
                     ) {
