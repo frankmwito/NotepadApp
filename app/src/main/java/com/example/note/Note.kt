@@ -1,7 +1,7 @@
 package com.example.note
 
 data class Note(
-    val title: String,
-    val body: String,
-    val timestamp: Long
+    var title: String,
+    var body: String,
+    var timestamp: Long
 )

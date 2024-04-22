@@ -63,26 +63,23 @@ class HomeScreen : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                MainScreen()
+                MainScreen(viewModel = viewModel())
             }
         }
     }
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: NotesViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
         Home_Screen()
+        Spacer(modifier = Modifier.height( 8.dp))
+        NotesList(viewModel)
     }
-    Spacer(modifier = Modifier.height( 8.dp))
-    Row {
-        NotesList(viewModel = viewModel())
-    }
-    // Implement your UI for expanded screens (e.g., tablets in landscape mode or larger devices)
 }
 @SuppressLint("SuspiciousIndentation")
 @Composable
@@ -223,14 +220,15 @@ fun Home_Screen() {
 @Composable
 fun Notecard(note: Note, onDelete: () -> Unit) {
     Card(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            ),// Provide a Dp value for elevation
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        ),// Provide a Dp value for elevation
         modifier = Modifier
+            .background(color = Color.Gray)
             .fillMaxWidth()
             .padding(16.dp),
 
-    ) {
+        ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -262,13 +260,13 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-               IconButton(onClick = { onDelete},
-                   modifier = Modifier.size(20.dp, 20.dp)) {
-                   Icon(
-                       imageVector = Icons.Default.Delete,
-                       contentDescription = "Delete",
-                       tint = Color.Red)
-               }
+                IconButton(onClick = { onDelete()},
+                    modifier = Modifier.size(20.dp, 20.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Red)
+                }
             }
         }
     }

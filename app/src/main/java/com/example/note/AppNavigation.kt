@@ -1,9 +1,10 @@
 package com.example.note
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.padding
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -11,9 +12,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -25,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 class AppNavigation : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,6 +36,7 @@ class AppNavigation : ComponentActivity() {
     }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App_Navigation() {
     val navController: NavHostController = rememberNavController()
@@ -76,7 +79,7 @@ fun App_Navigation() {
             startDestination = Screens.HomeScreen.name,
             builder = {
                 composable(route = Screens.HomeScreen.name){
-                    MainScreen()
+                    MainScreen(viewModel = viewModel())
 
                 }
                 composable(route = Screens.TodoList.name){

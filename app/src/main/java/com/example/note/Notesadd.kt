@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -25,10 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +44,7 @@ class Notesadd : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NoteAddScreen(viewModel = viewModel)
+            NoteAddScreen(viewModel)
         }
     }
 }
@@ -55,16 +53,20 @@ class Notesadd : ComponentActivity() {
 @Composable
 fun NoteAddScreen(viewModel: NotesViewModel) {
     val ctx = LocalContext.current
-    var title by remember { mutableStateOf("") }
-    var body by remember { mutableStateOf("") }
+    val title = remember { mutableStateOf("") }
+    val body = remember { mutableStateOf("") }
 
     TopAppBar(
-        title = { Text("Notes",
-            fontSize = 24.sp,
-            color = Color.Black,
-            fontStyle = FontStyle.Italic,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif) },
+        title = {
+            Text(
+                "Notes",
+                fontSize = 24.sp,
+                color = Color.Black,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif
+            )
+        },
         navigationIcon = {
             IconButton(onClick = { val intent = Intent(ctx, HomeScreen::class.java)
                 ctx.startActivity(intent) }) {
@@ -76,7 +78,7 @@ fun NoteAddScreen(viewModel: NotesViewModel) {
         },
         actions = {
             Row {
-                IconButton(onClick = { viewModel.addNote(title, body) }) {
+                IconButton(onClick = { viewModel.addNote(title.value, body.value) }) {
                     Icon(
                         imageVector = Icons.Filled.SaveAlt,
                         contentDescription = "Save"
@@ -85,24 +87,20 @@ fun NoteAddScreen(viewModel: NotesViewModel) {
             }
         }
     )
-    Row(
-        modifier = Modifier.offset(y = 50.dp)
-    ) {
-        body()
-    }
+
+    BodyContent(title = title, body = body)
 }
+
 @Composable
-fun body(){
-    var title by remember { mutableStateOf("") }
-    var body by remember { mutableStateOf("") }
+fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         TextField(
-            value = title,
-            onValueChange = { title = it },
+            value = title.value,
+            onValueChange = { title.value = it },
             label = {
                 Text(
                     "Title......",
@@ -115,7 +113,7 @@ fun body(){
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -123,8 +121,8 @@ fun body(){
         Spacer(modifier = Modifier.height(16.dp))
         Card {
             TextField(
-                value = body,
-                onValueChange = { body = it },
+                value = body.value,
+                onValueChange = { body.value = it },
                 placeholder = {
                     Text(
                         text = "Note something down.....",
@@ -137,7 +135,7 @@ fun body(){
                 },
                 modifier = Modifier.fillMaxWidth(),
 
-            )
+                )
         }
     }
 }
