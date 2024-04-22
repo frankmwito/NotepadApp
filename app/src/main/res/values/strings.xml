@@ -9,4 +9,5 @@
     <string name="title_activity_app_navigation">AppNavigation</string>
     <string name="title_activity_main2">MainActivity2</string>
     <string name="title_activity_notesadd">Notesadd</string>
+    <string name="title_activity_notes_view_model">NotesViewModel</string>
 </resources>
