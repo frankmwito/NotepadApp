@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +43,8 @@ class Notesadd : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val existingNotes = loadNotes(this)
+        viewModel.notes.addAll(existingNotes)
         setContent {
             NoteAddScreen(viewModel, onBackPressed = { onBackPressed() })
         }
@@ -52,6 +55,7 @@ class Notesadd : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
+    val ctx = LocalContext.current
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
 
@@ -77,7 +81,7 @@ fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.addNote(title.value, body.value) }) {
+                    IconButton(onClick = { viewModel.addNoteAndSave(title.value, body.value, ctx) }) {
                         Icon(
                             imageVector = Icons.Filled.SaveAlt,
                             contentDescription = "Save"

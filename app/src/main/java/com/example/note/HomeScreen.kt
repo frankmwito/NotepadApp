@@ -58,27 +58,29 @@ import java.util.Calendar
 import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.DONUT)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Load notes from SharedPreferences
+        val existingNotes = loadNotes(this)
+
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                MainScreen(viewModel = viewModel())
+                MainScreen(viewModel = viewModel(), notes = existingNotes)
             }
         }
     }
 }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(viewModel: NotesViewModel) {
+fun MainScreen(viewModel: NotesViewModel, notes: List<Note>) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         Home_Screen()
         Spacer(modifier = Modifier.height( 8.dp))
-        NotesList(viewModel)
+        NotesList(viewModel = viewModel, notes = notes)
     }
 }
 @SuppressLint("SuspiciousIndentation")
@@ -219,16 +221,14 @@ fun Home_Screen() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Notecard(note: Note, onDelete: () -> Unit) {
+    val context = LocalContext.current // Obtain context using LocalContext
     Card(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        ),// Provide a Dp value for elevation
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .background(color = Color.Gray)
             .fillMaxWidth()
-            .padding(16.dp),
-
-        ) {
+            .padding(16.dp)
+    ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -236,14 +236,14 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
                 text = note.title,
                 fontStyle = FontStyle.Italic,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif, // Use typography styles from MaterialTheme
+                fontFamily = FontFamily.SansSerif,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = note.body,
                 fontStyle = FontStyle.Normal,
-                fontFamily = FontFamily.SansSerif, // Use typography styles from MaterialTheme
+                fontFamily = FontFamily.SansSerif,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -260,12 +260,15 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onDelete()},
-                    modifier = Modifier.size(20.dp, 20.dp)) {
+                IconButton(
+                    onClick = onDelete, // Invoke onDelete function when clicked
+                    modifier = Modifier.size(20.dp, 20.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = Color.Red)
+                        tint = Color.Red
+                    )
                 }
             }
         }
@@ -274,15 +277,15 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesList(viewModel: NotesViewModel) {
-    val notes = viewModel.notes
-
+fun NotesList(viewModel: NotesViewModel, notes: List<Note>) {
+    val context = LocalContext.current // Obtain context using LocalContext
     LazyColumn {
         items(notes) { note ->
-            Notecard(note) { viewModel.deleteNote(note) }
+            Notecard(note) { viewModel.deleteNoteAndSave(note, context) }
         }
     }
 }
+
 
 
 
