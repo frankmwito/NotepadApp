@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -39,8 +40,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +67,7 @@ class HomeScreen : ComponentActivity() {
 
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                MainScreen(viewModel = viewModel)
+                MainScreen(viewModel = viewModel, context = this)
             }
         }
     }
@@ -76,13 +75,13 @@ class HomeScreen : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(viewModel: NotesViewModel) {
+fun MainScreen(viewModel: NotesViewModel, context: Context) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         Home_Screen()
         Spacer(modifier = Modifier.height( 8.dp))
-        NotesList(viewModel = viewModel, context = LocalContext.current)
+        NotesList(viewModel = viewModel, context = context)
     }
 }
 
@@ -226,6 +225,7 @@ fun Home_Screen() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Notecard(note: Note, onDelete: () -> Unit) {
+    Log.d("Notecard", "Displaying note: $note")
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
@@ -277,14 +277,11 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesList(
-    viewModel: NotesViewModel,
-    context: Context // Add context parameter here
-) {
-    val notes by viewModel.notesLiveData.observeAsState(emptyList())
+fun NotesList(viewModel: NotesViewModel, context: Context) {
+    viewModel.loadNotes(context) // Load notes from SharedPreferences when the composable is created
 
     LazyColumn {
-        items(notes) { note ->
+        items(viewModel.notesLiveData.value.orEmpty()) { note ->
             Notecard(note = note) {
                 viewModel.deleteNoteAndSave(context, note) // Pass context here
             }

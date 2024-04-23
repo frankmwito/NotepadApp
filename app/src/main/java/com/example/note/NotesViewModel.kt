@@ -1,6 +1,7 @@
 package com.example.note
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,9 @@ class NotesViewModel : ViewModel() {
         val currentNotes = _notesLiveData.value.orEmpty().toMutableList()
         currentNotes.add(note)
         saveNotes(context, currentNotes)
+
+        // Add logging to confirm that the method is being called
+        Log.d("NotesViewModel", "Added note: $note")
     }
 
     fun deleteNoteAndSave(context: Context, note: Note) {
@@ -44,3 +48,4 @@ class NotesViewModel : ViewModel() {
         _notesLiveData.value = notes
     }
 }
+/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
