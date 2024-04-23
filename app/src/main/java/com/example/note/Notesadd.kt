@@ -43,10 +43,11 @@ class Notesadd : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val existingNotes = loadNotes(this)
-        viewModel.notes.addAll(existingNotes)
         setContent {
-            NoteAddScreen(viewModel, onBackPressed = { onBackPressed() })
+            NoteAddScreen(
+                viewModel = viewModel,
+                onBackPressed = { onBackPressed() }
+            )
         }
     }
 }
@@ -55,9 +56,10 @@ class Notesadd : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
-    val ctx = LocalContext.current
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
+    val ctx = LocalContext.current
+    val context = ctx
 
     Scaffold(
         topBar = {
@@ -81,7 +83,14 @@ fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.addNoteAndSave(title.value, body.value, ctx) }) {
+                    IconButton(onClick = {
+                        viewModel.addNoteAndSave(context, // Pass the context here
+                            note = Note(
+                                title = title.value,
+                                body = body.value,
+                                timestamp = System.currentTimeMillis()
+                            ))
+                        onBackPressed() }) {
                         Icon(
                             imageVector = Icons.Filled.SaveAlt,
                             contentDescription = "Save"
@@ -94,7 +103,6 @@ fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
         BodyContent(title = title, body = body)
     }
 }
-
 @Composable
 fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
     Column(
@@ -144,4 +152,3 @@ fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
         }
     }
 }
-

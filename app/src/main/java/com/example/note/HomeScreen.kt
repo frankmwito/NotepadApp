@@ -2,11 +2,13 @@ package com.example.note
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +52,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -58,15 +61,14 @@ import java.util.Calendar
 import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
+    private val viewModel: NotesViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Load notes from SharedPreferences
-        val existingNotes = loadNotes(this)
-
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                MainScreen(viewModel = viewModel(), notes = existingNotes)
+                MainScreen(viewModel = viewModel)
             }
         }
     }
@@ -74,15 +76,17 @@ class HomeScreen : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(viewModel: NotesViewModel, notes: List<Note>) {
+fun MainScreen(viewModel: NotesViewModel) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         Home_Screen()
         Spacer(modifier = Modifier.height( 8.dp))
-        NotesList(viewModel = viewModel, notes = notes)
+        NotesList(viewModel = viewModel, context = LocalContext.current)
     }
 }
+
+
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun Home_Screen() {
@@ -218,10 +222,10 @@ fun Home_Screen() {
     }
 
 
+// Notecard composable
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Notecard(note: Note, onDelete: () -> Unit) {
-    val context = LocalContext.current // Obtain context using LocalContext
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
@@ -253,17 +257,13 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
                 fontWeight = FontWeight.Medium,
                 color = Color.DarkGray
             )
-
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = onDelete, // Invoke onDelete function when clicked
-                    modifier = Modifier.size(20.dp, 20.dp)
-                ) {
+                IconButton(onClick = onDelete, modifier = Modifier.size(20.dp, 20.dp)) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
@@ -277,11 +277,17 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesList(viewModel: NotesViewModel, notes: List<Note>) {
-    val context = LocalContext.current // Obtain context using LocalContext
+fun NotesList(
+    viewModel: NotesViewModel,
+    context: Context // Add context parameter here
+) {
+    val notes by viewModel.notesLiveData.observeAsState(emptyList())
+
     LazyColumn {
         items(notes) { note ->
-            Notecard(note) { viewModel.deleteNoteAndSave(note, context) }
+            Notecard(note = note) {
+                viewModel.deleteNoteAndSave(context, note) // Pass context here
+            }
         }
     }
 }
