@@ -1,12 +1,10 @@
 package com.example.note
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +43,7 @@ class Notesadd : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NoteAddScreen(viewModel)
+            NoteAddScreen(viewModel, onBackPressed = { onBackPressed() })
         }
     }
 }
@@ -54,8 +51,7 @@ class Notesadd : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteAddScreen(viewModel: NotesViewModel) {
-    val ctx = LocalContext.current
+fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
 
@@ -73,10 +69,7 @@ fun NoteAddScreen(viewModel: NotesViewModel) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        val intent = Intent(ctx, HomeScreen::class.java)
-                        ctx.startActivity(intent)
-                    }) {
+                    IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back"
@@ -84,37 +77,56 @@ fun NoteAddScreen(viewModel: NotesViewModel) {
                     }
                 },
                 actions = {
-                    Row {
-                        IconButton(onClick = { viewModel.addNote(title.value, body.value) }) {
-                            Icon(
-                                imageVector = Icons.Filled.SaveAlt,
-                                contentDescription = "Save"
-                            )
-                        }
+                    IconButton(onClick = { viewModel.addNote(title.value, body.value) }) {
+                        Icon(
+                            imageVector = Icons.Filled.SaveAlt,
+                            contentDescription = "Save"
+                        )
                     }
                 }
             )
         }
-    ) { paddingValues -> paddingValues
-        Spacer(modifier = Modifier.offset(y = 50.dp))
+    ) { PaddingValues -> PaddingValues
         BodyContent(title = title, body = body)
     }
 }
 
-
-    @Composable
-    fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+@Composable
+fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .offset(y = 70.dp)
+    ) {
+        TextField(
+            value = title.value,
+            onValueChange = { title.value = it },
+            label = {
+                Text(
+                    "Title......",
+                    fontSize = 16.sp,
+                    color = Color.Black,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif
+                )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            ),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Card {
             TextField(
-                value = title.value,
-                onValueChange = { title.value = it },
-                label = {
+                value = body.value,
+                onValueChange = { body.value = it },
+                placeholder = {
                     Text(
-                        "Title......",
+                        text = "Note something down.....",
                         fontSize = 16.sp,
                         color = Color.Black,
                         fontStyle = FontStyle.Italic,
@@ -122,31 +134,10 @@ fun NoteAddScreen(viewModel: NotesViewModel) {
                         fontFamily = FontFamily.SansSerif
                     )
                 },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
-                ),
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Card {
-                TextField(
-                    value = body.value,
-                    onValueChange = { body.value = it },
-                    placeholder = {
-                        Text(
-                            text = "Note something down.....",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
 
-                    )
-            }
+                )
         }
     }
+}
+

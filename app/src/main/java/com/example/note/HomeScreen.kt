@@ -167,7 +167,7 @@ fun Home_Screen() {
                 }
                 Row(
                     modifier = Modifier
-                        .offset(y = (500).dp) // adjust the value to move the FAB up
+                        .offset(y = (530).dp) // adjust the value to move the FAB up
                         .fillMaxSize()
                         .clip(RoundedCornerShape(10.dp)),
                     horizontalArrangement = Arrangement.Absolute.Right
