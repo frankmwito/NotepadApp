@@ -51,6 +51,9 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.0")
+    implementation ("androidx.room:room-runtime:2.6.1")
+    annotationProcessor ("androidx.room:room-compiler:2.6.1") // For Java projects
+    implementation ("androidx.room:room-ktx:2.6.1") // Kotlin
     implementation ("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.google.accompanist:accompanist-insets:0.23.1")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.28.0")
@@ -77,6 +80,9 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation("androidx.room:room-common:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    implementation("com.google.android.engage:engage-core:1.4.0")
     testImplementation("junit:junit:4.13.2")
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.6")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")

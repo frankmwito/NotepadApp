@@ -1,8 +1,12 @@
 package com.example.note
 
+import androidx.room.PrimaryKey
+
+@androidx.room.Entity(tableName = "notes")
 data class Note(
-    val id: Long,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val body: String,
-    val timestamp: Long
+    val timestamp: Long = System.currentTimeMillis()
 )
+

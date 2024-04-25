@@ -1,51 +1,41 @@
 package com.example.note
 
-import android.content.Context
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
-class NotesViewModel : ViewModel() {
-    private val _notesLiveData = MutableLiveData<List<Note>>()
-    val notesLiveData: LiveData<List<Note>> = _notesLiveData
 
-    fun addNoteAndSave(context: Context, note: Note) {
-        val currentNotes = _notesLiveData.value.orEmpty().toMutableList()
-        currentNotes.add(note)
-        saveNotes(context, currentNotes)
 
-        // Add logging to confirm that the method is being called
-        Log.d("NotesViewModel", "Added note: $note")
+class NotesViewModel(application: Application) : AndroidViewModel(application) {
+    private val noteDao = AppDatabase.getInstance(application).noteDao()
+    val notes: LiveData<List<Note>> = noteDao.getAllNotes()
+
+    // Use Room's Flow extension function to convert to LiveData
+
+    // Coroutine-Safe insert function
+    fun insertNote(title: String, body: String) {
+        val note = Note(id = 0, title = title, body = body)
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.insert(note)
+        }
     }
 
-    fun deleteNoteAndSave(context: Context, note: Note) {
-        val currentNotes = _notesLiveData.value.orEmpty().toMutableList()
-        currentNotes.remove(note)
-        saveNotes(context, currentNotes)
+    // Coroutine-Safe delete function
+    fun deleteNote(note: Note) {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.delete(note)
+        }
     }
 
-    private fun saveNotes(context: Context, notes: List<Note>) {
-        val sharedPreferences = context.getSharedPreferences("notes", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val gson = Gson()
-        val json = gson.toJson(notes)
-        editor.putString("notes", json)
-        editor.apply()
-
-        _notesLiveData.value = notes // Update LiveData
-    }
-
-    fun loadNotes(context: Context) {
-        val sharedPreferences = context.getSharedPreferences("notes", Context.MODE_PRIVATE)
-        val gson = Gson()
-        val json = sharedPreferences.getString("notes", null)
-        val type = object : TypeToken<List<Note>>() {}.type
-        val notes = gson.fromJson<List<Note>>(json, type) ?: emptyList()
-        _notesLiveData.value = notes
+    // Regular update function with coroutine
+    fun updateNote(note: Note) {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.update(note)
+        }
     }
 }
 /*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/

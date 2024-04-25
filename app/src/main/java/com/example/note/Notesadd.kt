@@ -29,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,7 +43,7 @@ class Notesadd : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NoteAddScreen(
+            NotesAdd(
                 viewModel = viewModel,
                 onBackPressed = { onBackPressed() }
             )
@@ -53,20 +52,19 @@ class Notesadd : ComponentActivity() {
 }
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
+fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
-    val ctx = LocalContext.current
-    val context = ctx
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Notes",
+                        "Add Note",
                         fontSize = 24.sp,
                         color = Color.Black,
                         fontStyle = FontStyle.Italic,
@@ -84,13 +82,9 @@ fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        viewModel.addNoteAndSave(context, // Pass the context here
-                            note = Note(
-                                title = title.value,
-                                body = body.value,
-                                timestamp = System.currentTimeMillis()
-                            ))
-                        onBackPressed() }) {
+                        viewModel.insertNote(title = title.value, body = body.value)
+                        onBackPressed()
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.SaveAlt,
                             contentDescription = "Save"
@@ -103,7 +97,10 @@ fun NoteAddScreen(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
         BodyContent(title = title, body = body)
     }
 }
-@Composable
+
+
+
+    @Composable
 fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
     Column(
         modifier = Modifier

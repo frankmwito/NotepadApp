@@ -2,14 +2,12 @@ package com.example.note
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -40,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -60,35 +62,35 @@ import java.util.Calendar
 import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
-    private val viewModel: NotesViewModel by viewModels()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                MainScreen(viewModel = viewModel, context = this)
-            }
+            MainScreen()
         }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(viewModel: NotesViewModel, context: Context) {
+fun MainScreen() {
+    val viewModel: NotesViewModel = viewModel()
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Home_Screen()
+        Home_Screen(viewModel = viewModel)
         Spacer(modifier = Modifier.height( 8.dp))
-        NotesList(viewModel = viewModel, context = context)
+
     }
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun Home_Screen() {
+fun Home_Screen(viewModel: NotesViewModel) {
     val ctx = LocalContext.current
         Surface(
             modifier = Modifier
@@ -190,6 +192,7 @@ fun Home_Screen() {
                     }
                 }
             }
+            NotesList(viewModel = viewModel)
         }
     }
 
@@ -224,7 +227,7 @@ fun Home_Screen() {
 // Notecard composable
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Notecard(note: Note, onDelete: () -> Unit) {
+fun NoteCard(note: Note, viewModel: NotesViewModel) {
     Log.d("Notecard", "Displaying note: $note")
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -263,7 +266,23 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onDelete, modifier = Modifier.size(20.dp, 20.dp)) {
+                IconButton(onClick = {
+                    viewModel.updateNote(
+                        Note(
+                            id = note.id,
+                            title = "Updated Title",
+                            body = "Updated Body",
+                            timestamp = note.timestamp
+                        )
+                    )
+                }, modifier = Modifier.size(20.dp, 20.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.Blue
+                    )
+                }
+                IconButton(onClick = { viewModel.deleteNote(note) }, modifier = Modifier.size(20.dp, 20.dp)) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
@@ -274,20 +293,18 @@ fun Notecard(note: Note, onDelete: () -> Unit) {
         }
     }
 }
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesList(viewModel: NotesViewModel, context: Context) {
-    viewModel.loadNotes(context) // Load notes from SharedPreferences when the composable is created
+fun NotesList(viewModel: NotesViewModel) {
+    val notes: List<Note>? by viewModel.notes.observeAsState()
 
     LazyColumn {
-        items(viewModel.notesLiveData.value.orEmpty()) { note ->
-            Notecard(note = note) {
-                viewModel.deleteNoteAndSave(context, note) // Pass context here
-            }
+        items(notes ?: emptyList()) { note ->
+            NoteCard(note = note, viewModel = viewModel)
         }
     }
 }
+
 
 
 

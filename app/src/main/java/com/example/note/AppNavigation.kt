@@ -12,10 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -80,8 +78,7 @@ fun App_Navigation() {
             startDestination = Screens.HomeScreen.name,
             builder = {
                 composable(route = Screens.HomeScreen.name){
-                    val viewModel: NotesViewModel = viewModel()
-                    MainScreen(viewModel = viewModel, context = LocalContext.current)
+                    MainScreen()
                 }
                 composable(route = Screens.TodoList.name){
                     Todolist()
