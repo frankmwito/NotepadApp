@@ -39,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.AbsoluteAlignment
@@ -53,6 +54,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -266,37 +270,72 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
-                    viewModel.updateNote(
-                        Note(
-                            id = note.id,
-                            title = "Updated Title",
-                            body = "Updated Body",
-                            timestamp = note.timestamp
-                        )
-                    )
-                }, modifier = Modifier.size(20.dp, 20.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = Color.Blue
-                    )
-                }
-                IconButton(onClick = { viewModel.deleteNote(note) }, modifier = Modifier.size(20.dp, 20.dp)) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color.Red
-                    )
-                }
+                EditButton(note = note, viewModel = viewModel)
+                DeleteButton(note = note, viewModel = viewModel)
             }
         }
     }
 }
+
+
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun EditButton(note: Note, viewModel: NotesViewModel) {
+    IconButton(
+        onClick = {
+// Call the updateNote function from a coroutine context
+            GlobalScope.launch {
+                viewModel.updateNote(
+                    Note(
+                        id = note.id,
+                        title = "Updated Title",
+                        body = "Updated Body",
+                        timestamp = note.timestamp
+                    )
+                )
+            }
+        },
+        modifier = Modifier.size(20.dp, 20.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Edit,
+            contentDescription = "Edit",
+            tint = Color.Blue
+        )
+    }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+@Composable
+fun DeleteButton(note: Note, viewModel: NotesViewModel) {
+    IconButton(
+        onClick = {
+            // Call the deleteNote function from a coroutine context
+            GlobalScope.launch {
+                viewModel.deleteNote(note)
+            }
+        },
+        modifier = Modifier.size(20.dp, 20.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete",
+            tint = Color.Red
+        )
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotesList(viewModel: NotesViewModel) {
     val notes: List<Note>? by viewModel.notes.observeAsState()
+
+    // Call the deleteNote function from a coroutine context
+    LaunchedEffect(Unit) {
+        notes?.forEach { note ->
+            viewModel.deleteNote(note)
+        }
+    }
 
     LazyColumn {
         items(notes ?: emptyList()) { note ->

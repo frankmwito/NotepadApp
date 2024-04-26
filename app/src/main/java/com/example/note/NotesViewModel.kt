@@ -3,9 +3,9 @@ package com.example.note
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val noteDao = AppDatabase.getInstance(application).noteDao()
     val notes: LiveData<List<Note>> = noteDao.getAllNotes()
@@ -13,23 +13,23 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     // Use Room's Flow extension function to convert to LiveData
 
     // Coroutine-Safe insert function
-    fun insertNote(title: String, body: String) {
-        val note = Note(id = 0, title = title, body = body)
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun insertNote(title: String, body: String) {
+        withContext(Dispatchers.IO) {
+            val note = Note(id = 0, title = title, body = body)
             noteDao.insert(note)
         }
     }
 
     // Coroutine-Safe delete function
-    fun deleteNote(note: Note) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun deleteNote(note: Note) {
+        withContext(Dispatchers.IO) {
             noteDao.delete(note)
         }
     }
 
     // Regular update function with coroutine
-    fun updateNote(note: Note) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun updateNote(note: Note) {
+        withContext(Dispatchers.IO) {
             noteDao.update(note)
         }
     }

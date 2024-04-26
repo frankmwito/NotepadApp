@@ -36,6 +36,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class Notesadd : ComponentActivity() {
     private val viewModel: NotesViewModel by viewModels()
@@ -52,8 +55,7 @@ class Notesadd : ComponentActivity() {
 }
 
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
     val title = remember { mutableStateOf("") }
@@ -82,8 +84,10 @@ fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        viewModel.insertNote(title = title.value, body = body.value)
-                        onBackPressed()
+                        GlobalScope.launch {
+                            viewModel.insertNote(title = title.value, body = body.value)
+                            onBackPressed()
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Filled.SaveAlt,
@@ -99,8 +103,7 @@ fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
 }
 
 
-
-    @Composable
+@Composable
 fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
     Column(
         modifier = Modifier
