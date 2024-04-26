@@ -28,19 +28,9 @@
             android:label="@string/title_activity_notesadd"
             android:theme="@style/Theme.Note" />
         <activity
-            android:name=".MainActivity2"
-            android:exported="false"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/Theme.Note" />
-        <activity
             android:name=".AppNavigation"
             android:exported="false"
             android:label="@string/title_activity_app_navigation"
-            android:theme="@style/Theme.Note" />
-        <activity
-            android:name=".Register"
-            android:exported="false"
-            android:label="@string/title_activity_register"
             android:theme="@style/Theme.Note" />
         <activity
             android:name=".shedular"
