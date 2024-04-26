@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.room:room-rxjava2:2.6.1")
     implementation("androidx.room:room-rxjava3:2.6.1")

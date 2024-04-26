@@ -33,12 +33,12 @@
             android:label="@string/title_activity_app_navigation"
             android:theme="@style/Theme.Note" />
         <activity
-            android:name=".shedular"
+            android:name=".Shedular"
             android:exported="false"
             android:label="@string/title_activity_shedular"
             android:theme="@style/Theme.Note" />
         <activity
-            android:name=".Todolist"
+            android:name=".TodoList"
             android:exported="false"
             android:label="@string/title_activity_todolist"
             android:theme="@style/Theme.Note" />

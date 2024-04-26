@@ -6,10 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
-
-
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val noteDao = AppDatabase.getInstance(application).noteDao()
     val notes: LiveData<List<Note>> = noteDao.getAllNotes()
