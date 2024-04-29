@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -330,10 +331,12 @@ fun DeleteButton(note: Note, viewModel: NotesViewModel) {
 fun NotesList(viewModel: NotesViewModel) {
     val notes: List<Note>? by viewModel.notes.observeAsState()
 
-    // Call the deleteNote function from a coroutine context
+    // Use viewModelScope
     LaunchedEffect(Unit) {
-        notes?.forEach { note ->
-            viewModel.deleteNote(note)
+        viewModel.viewModelScope.launch {
+            notes?.forEach { note ->
+                viewModel.deleteNote(note)
+            }
         }
     }
 
@@ -343,7 +346,6 @@ fun NotesList(viewModel: NotesViewModel) {
         }
     }
 }
-
 
 
 
