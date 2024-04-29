@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,8 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -278,14 +277,13 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
     }
 }
 
-
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun EditButton(note: Note, viewModel: NotesViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+
     IconButton(
         onClick = {
-// Call the updateNote function from a coroutine context
-            GlobalScope.launch {
+            coroutineScope.launch {
                 viewModel.updateNote(
                     Note(
                         id = note.id,
@@ -306,13 +304,13 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun DeleteButton(note: Note, viewModel: NotesViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+
     IconButton(
         onClick = {
-            // Call the deleteNote function from a coroutine context
-            GlobalScope.launch {
+            coroutineScope.launch {
                 viewModel.deleteNote(note)
             }
         },
