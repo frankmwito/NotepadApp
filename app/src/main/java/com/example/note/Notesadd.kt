@@ -36,8 +36,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class Notesadd : ComponentActivity() {
@@ -84,7 +84,7 @@ fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
                 },
                 actions = {
                     IconButton(onClick = {
-                        GlobalScope.launch {
+                        viewModel.viewModelScope.launch {
                             viewModel.insertNote(title = title.value, body = body.value)
                             onBackPressed()
                         }
