@@ -39,7 +39,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,7 +53,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -324,19 +322,11 @@ fun DeleteButton(note: Note, viewModel: NotesViewModel) {
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotesList(viewModel: NotesViewModel) {
-    val notes: List<Note>? by viewModel.notes.observeAsState()
-
-    // Use viewModelScope
-    LaunchedEffect(Unit) {
-        viewModel.viewModelScope.launch {
-            notes?.forEach { note ->
-                viewModel.deleteNote(note)
-            }
-        }
-    }
+    val notes by viewModel.notes.observeAsState()
 
     LazyColumn {
         items(notes ?: emptyList()) { note ->
@@ -344,7 +334,6 @@ fun NotesList(viewModel: NotesViewModel) {
         }
     }
 }
-
 
 
 
