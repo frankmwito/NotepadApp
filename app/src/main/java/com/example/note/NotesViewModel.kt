@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val noteDao = AppDatabase.getInstance(application).noteDao()
     val notes: LiveData<List<Note>> = noteDao.getAllNotes()
-
     // Coroutine-Safe insert function
     fun insertNote(title: String, body: String) {
         viewModelScope.launch(Dispatchers.IO) {
