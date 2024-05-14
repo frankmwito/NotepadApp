@@ -39,8 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -326,15 +326,14 @@ fun DeleteButton(note: Note, viewModel: NotesViewModel) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotesList(viewModel: NotesViewModel) {
-    val notes by viewModel.notes.observeAsState()
+    val notes by viewModel.notes.collectAsState()
 
     LazyColumn {
-        items(notes ?: emptyList()) { note ->
+        items(notes) { note ->
             NoteCard(note = note, viewModel = viewModel)
         }
     }
 }
-
 
 
 

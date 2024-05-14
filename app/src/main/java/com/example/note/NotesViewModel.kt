@@ -2,14 +2,21 @@ package com.example.note
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val noteDao = AppDatabase.getInstance(application).noteDao()
-    val notes: LiveData<List<Note>> = noteDao.getAllNotes()
+    val notes: StateFlow<List<Note>> = noteDao.getAllNotesFlow().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        emptyList()
+    )
+
     // Coroutine-Safe insert function
     fun insertNote(title: String, body: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -31,5 +38,4 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
             noteDao.update(note)
         }
     }
-}
-/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
+}/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
