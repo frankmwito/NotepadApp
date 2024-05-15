@@ -201,32 +201,32 @@ fun Home_Screen(viewModel: NotesViewModel) {
 }
 
 
-    @Composable
-    fun Notepad(
-        color: Color = Color.Black
+@Composable
+fun Notepad(
+    color: Color = Color.Black
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(color)
+            .fillMaxWidth()
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(color)
-                .fillMaxWidth()
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Notepad",
-                    fontSize = 24.sp,
-                    color = Color.White,
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif
-                )
-            }
+            Text(
+                text = "Notepad",
+                fontSize = 24.sp,
+                color = Color.White,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif
+            )
         }
     }
+}
 
 
 // Notecard composable
@@ -331,7 +331,9 @@ fun DeleteButton(note: Note, viewModel: NotesViewModel) {
 fun NotesList(viewModel: NotesViewModel) {
     val notes by viewModel.notes.collectAsState()
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 72.dp)){
         items(notes) { note ->
             NoteCard(note = note, viewModel = viewModel)
         }
