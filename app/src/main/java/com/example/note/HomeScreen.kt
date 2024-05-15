@@ -18,22 +18,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -42,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,29 +90,34 @@ fun MainScreen() {
 @Composable
 fun Home_Screen(viewModel: NotesViewModel) {
     val ctx = LocalContext.current
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.White)
+    ) {
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+
+        val greeting = when (currentHour) {
+            in 0..11 -> "Good Morning"
+            in 12..17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+
+        val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault())
+        val dateString = dateFormat.format(java.util.Date())
+
+        Box(
+            modifier = Modifier.padding(16.dp)
         ) {
-            val calendar = Calendar.getInstance()
-            val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-
-            val greeting = when (currentHour) {
-                in 0..11 -> "Good Morning"
-                in 12..17 -> "Good Afternoon"
-                else -> "Good Evening"
-            }
-
-            val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault())
-            val dateString = dateFormat.format(java.util.Date())
-
-            Box(
-                modifier = Modifier.padding(16.dp)
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
                 Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.Top
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
                         Text(
@@ -143,59 +145,61 @@ fun Home_Screen(viewModel: NotesViewModel) {
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif
                         )
-
                     }
-                    Spacer(modifier = Modifier.width((85).dp))
-                    Column(
-                        horizontalAlignment = AbsoluteAlignment.Left
-                    ) {
+
+                    Row {
                         IconButton(onClick = { /*TODO*/ }) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
                                 contentDescription = "Filter Icon"
                             )
                         }
-                    }
-                    Column {
                         IconButton(onClick = { /*TODO*/ }) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Settings Icon"
                             )
-
                         }
-
                     }
                 }
-                Row(
-                    modifier = Modifier.offset(y = 70.dp)
 
-                ) {
-                    Notepad()
-                }
-                Row(
-                    modifier = Modifier
-                        .offset(y = (530).dp) // adjust the value to move the FAB up
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(10.dp)),
-                    horizontalArrangement = Arrangement.Absolute.Right
-                ) {
-                    FloatingActionButton(
-                        onClick = {  val intent = Intent(ctx, Notesadd::class.java)
-                            ctx.startActivity(intent) },
-                        containerColor = Color.Black,
-                        modifier = Modifier.size(60.dp)
-                    ) {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Notepad()
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                NotesList(viewModel = viewModel)
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 56.dp), // Add padding to keep FAB above navigation bar
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                ExtendedFloatingActionButton(
+                    text = { Text(text = "New Note",
+                        color = Color.White) },
+                    icon = {
                         Icon(
-                            imageVector = Icons.Default.Add, contentDescription = "Add",
+                            imageVector = Icons.Default.Create,
+                            contentDescription = "Create a new Note",
                             tint = Color.White
                         )
-                    }
-                }
+                    },
+                    onClick = {
+                        val intent = Intent(ctx, Notesadd::class.java)
+                        ctx.startActivity(intent)
+                    },
+                    containerColor = Color.Black,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
-            NotesList(viewModel = viewModel)
         }
     }
+}
+
 
     @Composable
     fun Notepad(
@@ -233,9 +237,9 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
-            .background(color = Color.Gray)
+            .background(color = Color.Transparent)
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(5.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
