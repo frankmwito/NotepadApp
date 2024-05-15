@@ -10,32 +10,30 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
-    private val noteDao = AppDatabase.getInstance(application).noteDao()
-    val notes: StateFlow<List<Note>> = noteDao.getAllNotesFlow().stateIn(
+    private val noteRepository: NoteRepository = AppDatabase.provideNoteRepository(application)
+    val notes: StateFlow<List<Note>> = noteRepository.getAllNotes().stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
         emptyList()
     )
 
-    // Coroutine-Safe insert function
     fun insertNote(title: String, body: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val note = Note(id = 0, title = title, body = body)
-            noteDao.insert(note)
+            noteRepository.insert(note)
         }
     }
 
-    // Coroutine-Safe delete function
     fun deleteNote(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
-            noteDao.delete(note)
+            noteRepository.delete(note)
         }
     }
 
-    // Regular update function with coroutine
     fun updateNote(note: Note) {
         viewModelScope.launch(Dispatchers.IO) {
-            noteDao.update(note)
+            noteRepository.update(note)
         }
     }
-}/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
+}
+/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
