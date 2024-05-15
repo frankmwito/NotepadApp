@@ -24,5 +24,11 @@ abstract class AppDatabase : RoomDatabase() {
                 instance
             }
         }
+
+        fun provideNoteRepository(context: Context): NoteRepository {
+            val database = getInstance(context)
+            return NoteRepositoryImpl(database.noteDao())
+        }
     }
 }
+
