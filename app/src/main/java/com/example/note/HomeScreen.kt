@@ -83,8 +83,7 @@ fun MainScreen() {
         modifier = Modifier.fillMaxSize()
     ) {
         Home_Screen(viewModel = viewModel)
-        Spacer(modifier = Modifier.height( 8.dp))
-
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
