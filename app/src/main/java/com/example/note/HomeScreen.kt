@@ -1,7 +1,6 @@
 package com.example.note
 
 //noinspection UsingMaterialAndMaterial3Libraries
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -20,25 +19,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,7 +49,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -56,15 +56,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
-import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
 
@@ -91,151 +89,124 @@ fun MainScreen() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("SuspiciousIndentation")
 @Composable
 fun Home_Screen(viewModel: NotesViewModel) {
+    var showSearchDialog by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
 
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        val calendar = Calendar.getInstance()
-        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-
-        val greeting = when (currentHour) {
-            in 0..11 -> "Good Morning"
-            in 12..17 -> "Good Afternoon"
-            else -> "Good Evening"
-        }
-
-        val dateFormat = SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault())
-        val dateString = dateFormat.format(java.util.Date())
-
-        Box(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text(
-                            text = greeting,
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif
-                        )
-
-                        Text(
-                            text = "User's Name",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                        Text(
-                            text = dateString,
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                    }
-
-                    Row {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = "Filter Icon"
-                            )
-                        }
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings Icon"
-                            )
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Notepad",
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { showSearchDialog = true }) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                     }
                 }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Notepad()
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                NotesList(viewModel = viewModel)
-            }
-
+            )
+        },
+        content = { innerPadding ->
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
-                contentAlignment = Alignment.BottomEnd
+                modifier = Modifier.padding(innerPadding)
             ) {
-                ExtendedFloatingActionButton(
-                    text = { Text(text = "New Note",
-                        color = Color.Black) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Create,
-                            contentDescription = "Create a new Note",
-                            tint = Color.Black
-                        )
-                    },
-                    onClick = {
-                        val intent = Intent(ctx, Notesadd::class.java)
-                        ctx.startActivity(intent)
-                    },
-                    containerColor  = Color(0xFFCCC2DC),
-                    modifier = Modifier.padding(16.dp)
+                NotesList(viewModel = viewModel)
+                if (showSearchDialog) {
+                    FullScreenSearchDialog(
+                        viewModel = viewModel,
+                        onDismissRequest = { showSearchDialog = false }
+                    )
+                }
+            }
+            Floatingactionbutton()
+        }
+    )
+}
+@Composable
+fun Floatingactionbutton(){
+    val ctx = LocalContext.current
+    Box( modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
+        contentAlignment = Alignment.BottomEnd ){
+            ExtendedFloatingActionButton(
+                text = { Text(text = "New Note", color = Color.Black) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Create,
+                        contentDescription = "Create a new Note",
+                        tint = Color.Black
+                    )
+                },
+                onClick = {
+                    val intent = Intent(ctx, Notesadd::class.java)
+                    ctx.startActivity(intent)
+                },
+                containerColor = Color(0xFFCCC2DC),
+                modifier = Modifier.padding(16.dp)
+            )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FullScreenSearchDialog(
+    viewModel: NotesViewModel,
+    onDismissRequest: () -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val searchResults by viewModel.searchResults.collectAsState()
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Search Notes") },
+                    navigationIcon = {
+                        IconButton(onClick = onDismissRequest) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
                 )
             }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp) // Added padding
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = {
+                        searchQuery = it
+                        viewModel.searchNotes(it)
+                    },
+                    label = { Text("Search") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn {
+                    items(searchResults) { note ->
+                        NoteCard(note = note, viewModel = viewModel)
+                    }
+                }
+            }
         }
     }
 }
 
-
-@Composable
-fun Notepad(
-    color: Color = Color.Black
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(color)
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Notepad",
-                fontSize = 24.sp,
-                color = Color.White,
-                fontStyle = FontStyle.Italic,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
-            )
-        }
-    }
-}
-
-
-// Notecard composable
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteCard(note: Note, viewModel: NotesViewModel) {
@@ -249,7 +220,6 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
-
         ) {
             Text(
                 text = note.title,
@@ -279,12 +249,13 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 EditButton(note = note, viewModel = viewModel)
-                Spacer(modifier = Modifier.padding(5.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 DeleteButton(note = note, viewModel = viewModel)
             }
         }
     }
 }
+
 
 @Composable
 fun EditButton(note: Note, viewModel: NotesViewModel) {
@@ -405,6 +376,7 @@ fun DeleteConfirmationDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 72.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp) // Added padding
         ) {
             items(notes) { note ->
                 NoteCard(note = note, viewModel = viewModel)

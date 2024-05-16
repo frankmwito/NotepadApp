@@ -23,5 +23,13 @@ interface NoteDao {
     fun getAllNotes(): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes ORDER BY timestamp DESC")
-    fun getAllNotesFlow(): Flow<List<Note>> // Add this function to return a State Flow
+    fun getAllNotesFlow(): Flow<List<Note>>
+
+    @Query("""
+        SELECT * FROM notes 
+        WHERE title LIKE :query OR 
+              body LIKE :query OR 
+              strftime('%Y-%m-%d %H:%M:%S', datetime(timestamp / 1000, 'unixepoch')) LIKE :query
+    """)
+    fun searchNotes(query: String): List<Note>
 }
