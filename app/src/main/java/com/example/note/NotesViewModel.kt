@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -35,5 +36,13 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
             noteRepository.update(note)
         }
     }
+    private val _searchResults = MutableStateFlow<List<Note>>(emptyList())
+    val searchResults: StateFlow<List<Note>> = _searchResults
+
+    // Function to search notes
+    fun searchNotes(query: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _searchResults.value = noteRepository.searchNotes(query)
+        }
+    }
 }
-/*Note that the `saveNotes` function now updates the `_notesLiveData` variable instead of the `_notes` variable.*/
