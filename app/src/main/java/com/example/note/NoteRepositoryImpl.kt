@@ -17,4 +17,7 @@ class NoteRepositoryImpl(private val noteDao: NoteDao) : NoteRepository {
     override suspend fun delete(note: Note) {
         noteDao.delete(note)
     }
+    override fun searchNotes(query: String): List<Note> {
+        return noteDao.searchNotes("%$query%")
+    }
 }
