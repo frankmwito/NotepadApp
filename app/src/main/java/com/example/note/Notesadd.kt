@@ -112,7 +112,7 @@ fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
             onValueChange = { title.value = it },
             label = {
                 Text(
-                    "Title......",
+                    "Title",
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontStyle = FontStyle.Italic,
@@ -132,13 +132,17 @@ fun BodyContent(title: MutableState<String>, body: MutableState<String>) {
             TextField(
                 value = body.value,
                 onValueChange = { body.value = it },
+                label = { Text(text = "Body",fontSize = 16.sp,
+                    color = Color.Black,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif)},
                 placeholder = {
                     Text(
                         text = "Note something down.....",
                         fontSize = 16.sp,
                         color = Color.Black,
                         fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif
                     )
                 },
