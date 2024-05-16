@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,8 +62,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
 
@@ -94,14 +96,13 @@ fun MainScreen() {
 @Composable
 fun Home_Screen(viewModel: NotesViewModel) {
     var showSearchDialog by remember { mutableStateOf(false) }
-    val ctx = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Notepad",
+                        text = "My Notes",
                         fontSize = 24.sp,
                         color = Color.Black,
                         fontStyle = FontStyle.Italic,
@@ -112,7 +113,12 @@ fun Home_Screen(viewModel: NotesViewModel) {
                 actions = {
                     IconButton(onClick = { showSearchDialog = true }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    };
+                    IconButton(onClick = { showSearchDialog = true }) {
+                        Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
+
                     }
+
                 }
             )
         },
@@ -236,9 +242,10 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(8.dp))
+            val formattedTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(note.timestamp), ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy hh:mm a", Locale.getDefault()))
             Text(
-                text = LocalDateTime.ofInstant(Instant.ofEpochMilli(note.timestamp), ZoneOffset.UTC)
-                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy hh:mm a")),
+                text = formattedTime,
                 fontWeight = FontWeight.Medium,
                 color = Color.DarkGray
             )

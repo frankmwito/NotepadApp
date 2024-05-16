@@ -1,6 +1,8 @@
 package com.example.note
 
 import android.app.Application
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -9,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.Clock
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val noteRepository: NoteRepository = AppDatabase.provideNoteRepository(application)
@@ -18,9 +21,11 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         emptyList()
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun insertNote(title: String, body: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val note = Note(id = 0, title = title, body = body)
+            val currentTime = Clock.systemDefaultZone().instant()
+            val note = Note(id = 0, title = title, body = body, timestamp = currentTime.toEpochMilli())
             noteRepository.insert(note)
         }
     }
