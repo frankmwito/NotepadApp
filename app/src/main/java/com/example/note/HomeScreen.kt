@@ -181,7 +181,7 @@ fun Home_Screen(viewModel: NotesViewModel) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 56.dp), // Add padding to keep FAB above navigation bar
+                    .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
                 contentAlignment = Alignment.BottomEnd
             ) {
                 ExtendedFloatingActionButton(
@@ -316,6 +316,7 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
                             body = updatedBody
                         )
                     )
+                    showDialog = false
                 }
             }
         )
@@ -326,12 +327,11 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
 @Composable
 fun DeleteButton(note: Note, viewModel: NotesViewModel) {
     val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = {
-            coroutineScope.launch {
-                viewModel.deleteNote(note)
-            }
+            showDialog = true
         },
         modifier = Modifier.size(20.dp, 20.dp)
     ) {
@@ -341,66 +341,120 @@ fun DeleteButton(note: Note, viewModel: NotesViewModel) {
             tint = Color.Red
         )
     }
-}
 
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun NotesList(viewModel: NotesViewModel) {
-    val notes by viewModel.notes.collectAsState()
-
-    LazyColumn(modifier = Modifier
-        .fillMaxSize()
-        .padding(bottom = 72.dp)){
-        items(notes) { note ->
-            NoteCard(note = note, viewModel = viewModel)
-        }
+    if (showDialog) {
+        DeleteConfirmationDialog(
+            showDialog = showDialog,
+            onConfirm = {
+                coroutineScope.launch {
+                    viewModel.deleteNote(note)
+                    showDialog = false
+                }
+            },
+            onDismiss = {
+                showDialog = false
+            }
+        )
     }
 }
-@Composable
-fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String, String) -> Unit) {
-    val title = remember { mutableStateOf(note.title) }
-    val body = remember { mutableStateOf(note.body) }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(text = "Edit Note", fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column {
-                TextField(
-                    value = title.value,
-                    onValueChange = { title.value = it },
-                    label = { Text("Title") }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
-                    value = body.value,
-                    onValueChange = { body.value = it },
-                    label = { Text("Body") }
-                )
-            }
-        },
-        confirmButton = {
-            FilledTonalButton(
-                onClick = {
-                    onConfirm(title.value, body.value)
-                    onDismissRequest()
+
+@Composable
+fun DeleteConfirmationDialog(
+    showDialog: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            title = {
+                Text(text = "Delete Note")
+            },
+            text = {
+                Text("Are you sure you want to delete this note?")
+            },
+            confirmButton = {
+                FilledTonalButton(
+                    onClick = {
+                        onConfirm()
+                    }
+                ) {
+                    Text("Delete")
                 }
-            ) {
-                Text("Save")
+            },
+            dismissButton = {
+                FilledTonalButton(
+                    onClick = {
+                        onDismiss()
+                    }
+                ) {
+                    Text("Cancel")
+                }
             }
-        },
-        dismissButton = {
-            FilledTonalButton(
-                onClick = onDismissRequest
-            ) {
-                Text("Cancel")
+        )
+    }
+}
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    fun NotesList(viewModel: NotesViewModel) {
+        val notes by viewModel.notes.collectAsState()
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 72.dp)
+        ) {
+            items(notes) { note ->
+                NoteCard(note = note, viewModel = viewModel)
             }
         }
-    )
-}
+    }
+
+    @Composable
+    fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String, String) -> Unit) {
+        val title = remember { mutableStateOf(note.title) }
+        val body = remember { mutableStateOf(note.body) }
+
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = {
+                Text(text = "Edit Note", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column {
+                    TextField(
+                        value = title.value,
+                        onValueChange = { title.value = it },
+                        label = { Text("Title") }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextField(
+                        value = body.value,
+                        onValueChange = { body.value = it },
+                        label = { Text("Body") }
+                    )
+                }
+            },
+            confirmButton = {
+                FilledTonalButton(
+                    onClick = {
+                        onConfirm(title.value, body.value)
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                FilledTonalButton(
+                    onClick = onDismissRequest
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
 
 
