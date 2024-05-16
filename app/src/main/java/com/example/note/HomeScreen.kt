@@ -30,10 +30,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -186,19 +186,19 @@ fun Home_Screen(viewModel: NotesViewModel) {
             ) {
                 ExtendedFloatingActionButton(
                     text = { Text(text = "New Note",
-                        color = Color.White) },
+                        color = Color.Black) },
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Create,
                             contentDescription = "Create a new Note",
-                            tint = Color.White
+                            tint = Color.Black
                         )
                     },
                     onClick = {
                         val intent = Intent(ctx, Notesadd::class.java)
                         ctx.startActivity(intent)
                     },
-                    containerColor = Color.Black,
+                    containerColor  = Color(0xFFCCC2DC),
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -279,6 +279,7 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 EditButton(note = note, viewModel = viewModel)
+                Spacer(modifier = Modifier.padding(5.dp))
                 DeleteButton(note = note, viewModel = viewModel)
             }
         }
@@ -299,7 +300,7 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
         Icon(
             imageVector = Icons.Default.Edit,
             contentDescription = "Edit",
-            tint = Color.Blue
+            tint = Color.Black
         )
     }
 
@@ -382,7 +383,7 @@ fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String,
             }
         },
         confirmButton = {
-            Button(
+            FilledTonalButton(
                 onClick = {
                     onConfirm(title.value, body.value)
                     onDismissRequest()
@@ -392,7 +393,7 @@ fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String,
             }
         },
         dismissButton = {
-            Button(
+            FilledTonalButton(
                 onClick = onDismissRequest
             ) {
                 Text("Cancel")
