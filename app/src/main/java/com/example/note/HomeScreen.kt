@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -36,10 +38,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -239,10 +245,11 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
         modifier = Modifier
             .background(color = Color.Transparent)
             .fillMaxWidth()
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
+
         ) {
             Text(
                 text = note.title,
@@ -281,19 +288,11 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
 @Composable
 fun EditButton(note: Note, viewModel: NotesViewModel) {
     val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = {
-            coroutineScope.launch {
-                viewModel.updateNote(
-                    Note(
-                        id = note.id,
-                        title = "Updated Title",
-                        body = "Updated Body",
-                        timestamp = note.timestamp
-                    )
-                )
-            }
+            showDialog = true
         },
         modifier = Modifier.size(20.dp, 20.dp)
     ) {
@@ -303,7 +302,25 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
             tint = Color.Blue
         )
     }
+
+    if (showDialog) {
+        EditNoteDialog(
+            note = note,
+            onDismissRequest = { showDialog = false },
+            onConfirm = { updatedTitle, updatedBody ->
+                coroutineScope.launch {
+                    viewModel.updateNote(
+                        note.copy(
+                            title = updatedTitle,
+                            body = updatedBody
+                        )
+                    )
+                }
+            }
+        )
+    }
 }
+
 
 @Composable
 fun DeleteButton(note: Note, viewModel: NotesViewModel) {
@@ -338,6 +355,50 @@ fun NotesList(viewModel: NotesViewModel) {
             NoteCard(note = note, viewModel = viewModel)
         }
     }
+}
+@Composable
+fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String, String) -> Unit) {
+    val title = remember { mutableStateOf(note.title) }
+    val body = remember { mutableStateOf(note.body) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = "Edit Note", fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column {
+                TextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
+                    label = { Text("Title") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = body.value,
+                    onValueChange = { body.value = it },
+                    label = { Text("Body") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(title.value, body.value)
+                    onDismissRequest()
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Button(
+                onClick = onDismissRequest
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 
