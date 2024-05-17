@@ -1,6 +1,5 @@
 package com.example.note
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -18,9 +17,6 @@ interface NoteDao {
 
     @Delete
     suspend fun delete(note: Note)
-
-    @Query("SELECT * FROM notes ORDER BY timestamp DESC")
-    fun getAllNotes(): LiveData<List<Note>>
 
     @Query("SELECT * FROM notes ORDER BY timestamp DESC")
     fun getAllNotesFlow(): Flow<List<Note>>
