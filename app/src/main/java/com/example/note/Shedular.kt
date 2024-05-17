@@ -55,7 +55,7 @@ fun Shedules(){
                   Text(
                       text = "Welcome to ShedularScreen",
                       color = Color.Black,
-                      fontStyle = FontStyle.Italic,
+                      fontStyle = FontStyle.Normal,
                       fontSize = 24.sp,
                       fontWeight = FontWeight.Bold,
                       fontFamily = FontFamily.SansSerif
