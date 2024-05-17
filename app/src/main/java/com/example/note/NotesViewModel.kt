@@ -1,6 +1,7 @@
 package com.example.note
 
 import android.app.Application
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
@@ -41,13 +42,32 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
             noteRepository.update(note)
         }
     }
+
     private val _searchResults = MutableStateFlow<List<Note>>(emptyList())
     val searchResults: StateFlow<List<Note>> = _searchResults
 
-    // Function to search notes
     fun searchNotes(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _searchResults.value = noteRepository.searchNotes(query)
         }
+    }
+
+    private val _sortedNotes = MutableStateFlow<List<Note>>(emptyList())
+    val sortedNotes: StateFlow<List<Note>> = _sortedNotes
+
+    init {
+        sortNotes("timestamp", NoteRepository.SortOrder.ASC) // Default sort
+    }
+
+    fun sortNotes(sortBy: String, sortOrder: NoteRepository.SortOrder) {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteRepository.sortNotes(sortBy, sortOrder).collect { sortedNotes ->
+                _sortedNotes.value = sortedNotes
+            }
+        }
+    }
+
+    fun shareNote(note: Note): Intent {
+        return noteRepository.shareNote(note)
     }
 }

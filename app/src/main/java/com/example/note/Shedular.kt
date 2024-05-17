@@ -63,7 +63,7 @@ fun Shedules(){
               }
           }
           Column {
-              Button(onClick = {  val intent = Intent(ctx, Notesadd::class.java)
+              Button(onClick = {  val intent = Intent(ctx, Noteadd::class.java)
                   ctx.startActivity(intent)  }) {
 
               }
