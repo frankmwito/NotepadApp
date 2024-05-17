@@ -1,6 +1,6 @@
 package com.example.note
 
-//noinspection UsingMaterialAndMaterial3Libraries
+
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,8 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -113,7 +114,7 @@ fun Home_Screen(viewModel: NotesViewModel) {
                 actions = {
                     IconButton(onClick = { showSearchDialog = true }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-                    };
+                    }
                     IconButton(onClick = { showSearchDialog = true }) {
                         Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
 
@@ -216,6 +217,8 @@ fun FullScreenSearchDialog(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteCard(note: Note, viewModel: NotesViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
     Log.d("Notecard", "Displaying note: $note")
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -223,6 +226,7 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
             .background(color = Color.Transparent)
             .fillMaxWidth()
             .padding(8.dp)
+            .clickable { showDialog = true }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -255,33 +259,16 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                EditButton(note = note, viewModel = viewModel)
+                IconButton(onClick = { }) {
+                    Icon(imageVector = Icons.Default.Share,
+                        contentDescription = "Share",
+                        modifier = Modifier.size(20.dp,20.dp))
+                }
                 Spacer(modifier = Modifier.width(5.dp))
                 DeleteButton(note = note, viewModel = viewModel)
             }
         }
     }
-}
-
-
-@Composable
-fun EditButton(note: Note, viewModel: NotesViewModel) {
-    val coroutineScope = rememberCoroutineScope()
-    var showDialog by remember { mutableStateOf(false) }
-
-    IconButton(
-        onClick = {
-            showDialog = true
-        },
-        modifier = Modifier.size(20.dp, 20.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = "Edit",
-            tint = Color.Black
-        )
-    }
-
     if (showDialog) {
         EditNoteDialog(
             note = note,
@@ -300,7 +287,49 @@ fun EditButton(note: Note, viewModel: NotesViewModel) {
         )
     }
 }
+@Composable
+fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String, String) -> Unit) {
+    val title = remember { mutableStateOf(note.title) }
+    val body = remember { mutableStateOf(note.body) }
 
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = "Edit Note", fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column {
+                TextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
+                    label = { Text("Title") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = body.value,
+                    onValueChange = { body.value = it },
+                    label = { Text("Body") }
+                )
+            }
+        },
+        confirmButton = {
+            FilledTonalButton(
+                onClick = {
+                    onConfirm(title.value, body.value)
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            FilledTonalButton(
+                onClick = onDismissRequest
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
 
 @Composable
 fun DeleteButton(note: Note, viewModel: NotesViewModel) {
@@ -390,50 +419,5 @@ fun DeleteConfirmationDialog(
             }
         }
     }
-
-    @Composable
-    fun EditNoteDialog(note: Note, onDismissRequest: () -> Unit, onConfirm: (String, String) -> Unit) {
-        val title = remember { mutableStateOf(note.title) }
-        val body = remember { mutableStateOf(note.body) }
-
-        AlertDialog(
-            onDismissRequest = onDismissRequest,
-            title = {
-                Text(text = "Edit Note", fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Column {
-                    TextField(
-                        value = title.value,
-                        onValueChange = { title.value = it },
-                        label = { Text("Title") }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
-                        value = body.value,
-                        onValueChange = { body.value = it },
-                        label = { Text("Body") }
-                    )
-                }
-            },
-            confirmButton = {
-                FilledTonalButton(
-                    onClick = {
-                        onConfirm(title.value, body.value)
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                FilledTonalButton(
-                    onClick = onDismissRequest
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
 
 
