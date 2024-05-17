@@ -1,6 +1,6 @@
 package com.example.note
 
-
+//noinspection UsingMaterialAndMaterial3Libraries
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +33,8 @@ import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
@@ -91,12 +93,14 @@ fun MainScreen() {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Home_Screen(viewModel: NotesViewModel) {
     var showSearchDialog by remember { mutableStateOf(false) }
+    var sortBy by remember { mutableStateOf("timestamp") }
+    var sortOrder by remember { mutableStateOf(NoteRepository.SortOrder.ASC) }
+    var showSortMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -115,11 +119,20 @@ fun Home_Screen(viewModel: NotesViewModel) {
                     IconButton(onClick = { showSearchDialog = true }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                     }
-                    IconButton(onClick = { showSearchDialog = true }) {
+                    IconButton(onClick = { showSortMenu = !showSortMenu }) {
                         Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
-
                     }
-
+                    SortDropdownMenu(
+                        expanded = showSortMenu,
+                        onDismissRequest = { showSortMenu = false },
+                        onSortSelected = { newSortBy, newSortOrder ->
+                            sortBy = newSortBy
+                            sortOrder = newSortOrder
+                            viewModel.sortNotes(sortBy, sortOrder)
+                        },
+                        currentSortBy = sortBy,
+                        currentSortOrder = sortOrder
+                    )
                 }
             )
         },
@@ -127,7 +140,17 @@ fun Home_Screen(viewModel: NotesViewModel) {
             Box(
                 modifier = Modifier.padding(innerPadding)
             ) {
-                NotesList(viewModel = viewModel)
+                val sortedNotes by viewModel.sortedNotes.collectAsState()
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 72.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    items(sortedNotes) { note ->
+                        NoteCard(note = note, viewModel = viewModel)
+                    }
+                }
                 if (showSearchDialog) {
                     FullScreenSearchDialog(
                         viewModel = viewModel,
@@ -139,6 +162,66 @@ fun Home_Screen(viewModel: NotesViewModel) {
         }
     )
 }
+
+@Composable
+fun SortDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onSortSelected: (String, NoteRepository.SortOrder) -> Unit,
+    currentSortBy: String,
+    currentSortOrder: NoteRepository.SortOrder
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("title", currentSortOrder)
+                onDismissRequest()
+            },
+            text  = {
+                Text(text = "Sort by Title")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("body", currentSortOrder)
+                onDismissRequest()
+            },
+            text = {
+                Text(text = "Sort by Body")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("timestamp", currentSortOrder)
+                onDismissRequest()
+            },
+            text = {
+                Text(text = "Sort by Timestamp")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                val newOrder = if (currentSortOrder == NoteRepository.SortOrder.ASC) {
+                    NoteRepository.SortOrder.DESC
+                } else {
+                    NoteRepository.SortOrder.ASC
+                }
+                onSortSelected(currentSortBy, newOrder)
+                onDismissRequest()
+            },
+            text = {
+                Text(
+                    text = if (currentSortOrder == NoteRepository.SortOrder.ASC) "Sort Descending" else "Sort Ascending"
+                )
+            }
+        )
+    }
+}
+
+
 @Composable
 fun Floatingactionbutton(){
     val ctx = LocalContext.current
@@ -156,7 +239,7 @@ fun Floatingactionbutton(){
                     )
                 },
                 onClick = {
-                    val intent = Intent(ctx, Notesadd::class.java)
+                    val intent = Intent(ctx, Noteadd::class.java)
                     ctx.startActivity(intent)
                 },
                 containerColor = Color(0xFFCCC2DC),
@@ -214,11 +297,13 @@ fun FullScreenSearchDialog(
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteCard(note: Note, viewModel: NotesViewModel) {
     val coroutineScope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
     Log.d("Notecard", "Displaying note: $note")
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -259,10 +344,11 @@ fun NoteCard(note: Note, viewModel: NotesViewModel) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
-                        modifier = Modifier.size(20.dp,20.dp))
+                IconButton(onClick = {
+                    val shareIntent = viewModel.shareNote(note)
+                    ctx.startActivity(Intent.createChooser(shareIntent, "Share Note"))
+                }) {
+                    Icon(imageVector = Icons.Default.Share, contentDescription = "Share")
                 }
                 Spacer(modifier = Modifier.width(5.dp))
                 DeleteButton(note = note, viewModel = viewModel)
@@ -406,18 +492,17 @@ fun DeleteConfirmationDialog(
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun NotesList(viewModel: NotesViewModel) {
-        val notes by viewModel.notes.collectAsState()
+        val notes by viewModel.sortedNotes.collectAsState()
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 72.dp)
-                .padding(horizontal = 16.dp, vertical = 8.dp) // Added padding
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             items(notes) { note ->
                 NoteCard(note = note, viewModel = viewModel)
             }
         }
     }
-
 
