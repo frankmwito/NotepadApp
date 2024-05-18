@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.note.ui.theme.NoteTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -79,7 +80,9 @@ class HomeScreen : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MainScreen()
+            NoteTheme {
+                MainScreen()
+            }
         }
     }
 }

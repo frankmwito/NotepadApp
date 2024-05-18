@@ -8,7 +8,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,9 +66,20 @@ fun Todolist() {
                     color = Color.Black,
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.SansSerif) }
+                    fontFamily = FontFamily.SansSerif)
+                },
+                actions = {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(imageVector = Icons.Default.Search,
+                            contentDescription = "Sort")
+                    }
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(imageVector = Icons.Default.Sort,
+                            contentDescription = "Search")
+                    }
+                }
             )
-        },
+        }
     ) {paddingValues -> paddingValues
         Column(
             modifier = Modifier
@@ -74,5 +90,6 @@ fun Todolist() {
                color = Color.Black)
         }
     }
+
 }
 
