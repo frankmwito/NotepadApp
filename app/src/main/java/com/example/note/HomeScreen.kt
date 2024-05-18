@@ -120,7 +120,6 @@ fun Home_Screen(viewModel: NotesViewModel) {
     }
 
     Scaffold(
-        modifier = Modifier.background(color = Color.Transparent),
         topBar = {
             TopAppBar(
                 title = {
