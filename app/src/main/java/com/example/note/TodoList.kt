@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -97,13 +97,13 @@ fun Todolist() {
                 text = { Text(text = "New Task", color = Color.Black) },
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.Task,
+                        imageVector = Icons.Default.NoteAdd,
                         contentDescription = "Create a new Task",
                         tint = Color.Black
                     )
                 },
                 onClick = {
-                    val intent = Intent(ctx, Noteadd::class.java)
+                    val intent = Intent(ctx, TaskAdd::class.java)
                     ctx.startActivity(intent)
                 },
                 containerColor = Color(0xFFCCC2DC),
