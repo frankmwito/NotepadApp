@@ -11,4 +11,5 @@
     <string name="title_activity_notesadd">Notesadd</string>
     <string name="title_activity_notes_view_model">NotesViewModel</string>
     <string name="title_activity_edit_note">EditNote</string>
+    <string name="title_activity_task_add">TaskAdd</string>
 </resources>
