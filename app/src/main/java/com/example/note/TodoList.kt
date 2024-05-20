@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -41,20 +39,14 @@ class TodoList: ComponentActivity() {
 @Composable
 fun Todolist() {
     val systemUiController = rememberSystemUiController()
-    val useDarkIcons = !isSystemInDarkTheme()
-
-    DisposableEffect(systemUiController, useDarkIcons) {
-        // Update all of the system bar colors to be transparent, and use
-        // dark icons if we're in light theme
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = useDarkIcons
-        )
-
-        // setStatusBarColor() and setNavigationBarColor() also exist
-
-        onDispose {}
-    }
+    systemUiController.setStatusBarColor(
+        color = Color.Transparent,
+        darkIcons = true // Set true if using a light status bar
+    )
+    systemUiController.setNavigationBarColor(
+        color = Color.Transparent,
+        darkIcons = true // Set true if using a light navigation bar
+    )
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
