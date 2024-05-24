@@ -1,6 +1,5 @@
 package com.example.note
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -103,8 +102,6 @@ fun Todolist() {
                     )
                 },
                 onClick = {
-                    val intent = Intent(ctx, TaskAdd::class.java)
-                    ctx.startActivity(intent)
                 },
                 containerColor = Color(0xFFCCC2DC),
                 modifier = Modifier.padding(16.dp)
