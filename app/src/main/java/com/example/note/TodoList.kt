@@ -25,6 +25,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -117,37 +118,46 @@ fun Todolist() {
                 modifier = Modifier.padding(16.dp)
             )
         }
+        Spacer(modifier = Modifier.height(10.dp))
         todolist()
     }
 }
 @Composable
-fun todolist(){
+fun todolist() {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .background(color = Color.Transparent)
-            .padding(8.dp)
+            .padding(16.dp)
             .fillMaxWidth()
             .clickable { }
 
     ) {
+        Column {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = "Title")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Description")
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         Row(
-            modifier = Modifier.padding(8.dp)
-                .background(color = Color.Black),
+            modifier = Modifier
+                .padding(8.dp)
+                .background(color = Color.Transparent),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Absolute.Left
-        ){
-            RadioButton(selected = true, onClick = { /*TODO*/ })
+        ) {
+            RadioButton(selected = true, onClick = { /*TODO*/ },
+                modifier = Modifier.padding(2.dp),
+                colors = RadioButtonDefaults.colors(unselectedColor = Color.White,
+                    selectedColor = Color(0xFFCCC2DC), disabledSelectedColor = Color.Transparent
+                ))
         }
-        Column (
-            modifier = Modifier.padding(16.dp)
-        ){
-            Text(text = "Title")
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Description")
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+
     }
+}
 }
 
 
