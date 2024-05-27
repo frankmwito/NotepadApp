@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -93,33 +92,37 @@ fun Todolist() {
                     }
                 }
             )
-        }
-    ) { paddingValues ->
-        paddingValues
-        val ctx = LocalContext.current
+        }, content = {innerPadding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
-            contentAlignment = Alignment.BottomEnd
+            modifier = Modifier.padding(innerPadding),
         ) {
-            ExtendedFloatingActionButton(
-                text = { Text(text = "New Task", color = Color.Black) },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.NoteAdd,
-                        contentDescription = "Create a new Task",
-                        tint = Color.Black
-                    )
-                },
-                onClick = {
-                },
-                containerColor = Color(0xFFCCC2DC),
-                modifier = Modifier.padding(16.dp)
-            )
+            todolist()
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        todolist()
+            FloatingActionbutton()
+    }
+    )
+}
+
+@Composable
+fun FloatingActionbutton(){
+    Box( modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
+        contentAlignment = Alignment.BottomEnd ) {
+        ExtendedFloatingActionButton(
+            text = { Text(text = "New Task", color = Color.Black) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.NoteAdd,
+                    contentDescription = "Create a new Task",
+                    tint = Color.Black
+                )
+            },
+            onClick = {
+            },
+            containerColor = Color(0xFFCCC2DC),
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 @Composable
@@ -134,14 +137,7 @@ fun todolist() {
 
     ) {
         Column {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(text = "Title")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Description")
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -154,6 +150,15 @@ fun todolist() {
                 colors = RadioButtonDefaults.colors(unselectedColor = Color.White,
                     selectedColor = Color(0xFFCCC2DC), disabledSelectedColor = Color.Transparent
                 ))
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = "Title")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Description")
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
         }
 
     }
