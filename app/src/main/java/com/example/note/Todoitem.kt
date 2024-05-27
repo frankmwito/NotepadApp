@@ -1,13 +1,16 @@
 package com.example.note
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import java.time.LocalDateTime
 
-data class Todoitem @RequiresApi(Build.VERSION_CODES.O) constructor(
+@Entity(tableName = "todoitems")
+data class TodoItem(
+    @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val description: String,
-    val alertTime: LocalDateTime,
+    @TypeConverters(Converters::class)val alertTime: LocalDateTime?,
     val ringtone: String,
-    val createdTime: LocalDateTime = LocalDateTime.now()
+    val completed: Boolean = false
 )
