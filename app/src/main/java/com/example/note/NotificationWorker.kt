@@ -15,7 +15,7 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
     override suspend fun doWork(): Result {
         val title = inputData.getString("title") ?: return Result.failure()
         val description = inputData.getString("description") ?: return Result.failure()
-        val ringtoneUri = inputData.getString("ringtone")
+        val ringtoneUri = inputData.getString("ringtone")?.let { Uri.parse(it) }
 
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = System.currentTimeMillis().toInt()
@@ -32,7 +32,7 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-            .setSound(ringtoneUri?.let { Uri.parse(it) })
+            .setSound(ringtoneUri)
             .addAction(R.drawable.ic_stop, "Stop", stopPendingIntent)
             .build()
 
@@ -41,3 +41,4 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
         return Result.success()
     }
 }
+
