@@ -38,6 +38,7 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         todoItemRepository.delete(todoItem)
     }
 }
+
 /**
     fun getTodoItemById(id: Int): LiveData<TodoItem?> = liveData {
         emit(repository.getTodoItemById(id))

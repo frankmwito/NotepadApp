@@ -1,13 +1,17 @@
 package com.example.note
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
+import android.widget.DatePicker
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -35,13 +40,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -64,7 +69,10 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.util.Calendar
 
 class TodoList: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +102,9 @@ fun Main_Screen() {
 @Composable
 fun Todolist(viewModel: TodoListViewModel) {
     val allTodoItems by viewModel.allTodoItems.observeAsState(emptyList())
+    val completedTodoItems by viewModel.completedTodoItems.observeAsState(emptyList())
+    val overdueTodoItems by viewModel.overdueTodoItems.observeAsState(emptyList())
+    val noDateTodoItems by viewModel.noDateTodoItems.observeAsState(emptyList())
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
@@ -133,14 +144,51 @@ fun Todolist(viewModel: TodoListViewModel) {
         content = { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 LazyColumn {
-                    items(allTodoItems) { todoItem ->
+                    item {
+                        Text("Overdue", fontSize = 20.sp,
+                            color = Color.Black,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Bold)
+                    }
+                    items(overdueTodoItems) { todoItem ->
                         TodoItemCard(todoItem, viewModel)
+                    }
+
+                    item {
+                        Text("No Date", fontSize = 20.sp,
+                            color = Color.Black,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Bold)
+                    }
+                    items(noDateTodoItems) { todoItem ->
+                        TodoItemCard(todoItem, viewModel)
+                    }
+
+                    item {
+                        Text("Completed", fontSize = 20.sp,
+                            color = Color.Black,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Bold)
+                    }
+                    items(completedTodoItems) { todoItem ->
+                        TodoItemCard(todoItem, viewModel)
+                    }
+
+                    item {
+                        Text("All Tasks", fontSize = 20.sp,
+                            color = Color.Black,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Bold)
+                    }
+                    items(allTodoItems) { todoItem ->
+                        if (!todoItem.completed && !overdueTodoItems.contains(todoItem) && !noDateTodoItems.contains(todoItem)) {
+                            TodoItemCard(todoItem, viewModel)
+                        }
                     }
                 }
             }
             FloatingActionbutton(viewModel)
         }
-
     )
 }
 @Composable
@@ -198,12 +246,54 @@ fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
 }
 
 @Composable
+fun DateTimePicker(onDateTimeSelected: (LocalDateTime) -> Unit) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val datePickerDialog = remember {
+        DatePickerDialog(
+            context,
+            { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+                val timePickerDialog = TimePickerDialog(
+                    context,
+                    { _: TimePicker, hourOfDay: Int, minute: Int ->
+                        val selectedDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, hourOfDay, minute)
+                        onDateTimeSelected(selectedDateTime)
+                    },
+                    calendar.get(Calendar.HOUR_OF_DAY),
+                    calendar.get(Calendar.MINUTE),
+                    true
+                )
+                timePickerDialog.show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    FilledTonalButton(onClick = {
+        datePickerDialog.show()
+    }) {
+        Text("Pick Date and Time")
+    }
+}
+
+@Composable
 fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var alertTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var ringtoneUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
+
+    val datePickerDialog = createDatePickerDialog(context) { date ->
+        alertTime = alertTime?.withDate(date) ?: date.atStartOfDay()
+    }
+
+    val timePickerDialog = createTimePickerDialog(context) { time ->
+        alertTime = alertTime?.withTime(time) ?: LocalDate.now().atTime(time)
+    }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -220,12 +310,20 @@ fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
                     onValueChange = { description = it },
                     label = { Text(text = "Description") }
                 )
-                // Add Date and Time Picker here
+                Row {
+                    Button(onClick = { datePickerDialog.show() }) {
+                        Text(text = "Pick Date")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { timePickerDialog.show() }) {
+                        Text(text = "Pick Time")
+                    }
+                }
                 RingtonePicker(onRingtoneSelected = { uri -> ringtoneUri = uri })
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            FilledTonalButton(onClick = {
                 if (title.isNotEmpty() && description.isNotEmpty()) {
                     viewModel.insert(TodoItem(
                         id = 0,
@@ -244,12 +342,31 @@ fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
             }
         },
         dismissButton = {
-            TextButton(onClick = { onDismiss() }) {
+            FilledTonalButton(onClick = { onDismiss() }) {
                 Text(text = "Cancel")
             }
         }
     )
 }
+@Composable
+fun createDatePickerDialog(context: Context, onDateSelected: (LocalDate) -> Unit): DatePickerDialog {
+    val today = LocalDate.now()
+    return DatePickerDialog(context, { _, year, month, dayOfMonth ->
+        val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+        onDateSelected(selectedDate)
+    }, today.year, today.monthValue - 1, today.dayOfMonth)
+}
+
+fun createTimePickerDialog(context: Context, onTimeSelected: (LocalTime) -> Unit): TimePickerDialog {
+    val now = LocalTime.now()
+    return TimePickerDialog(context, { _, hourOfDay, minute ->
+        val selectedTime = LocalTime.of(hourOfDay, minute)
+        onTimeSelected(selectedTime)
+    }, now.hour, now.minute, true)
+}
+
+fun LocalDateTime.withDate(date: LocalDate): LocalDateTime = this.withYear(date.year).withMonth(date.monthValue).withDayOfMonth(date.dayOfMonth)
+fun LocalDateTime.withTime(time: LocalTime): LocalDateTime = this.withHour(time.hour).withMinute(time.minute)
 
 
 @Composable
@@ -264,7 +381,7 @@ fun RingtonePicker(onRingtoneSelected: (Uri) -> Unit) {
         }
     }
 
-    Button(onClick = {
+    FilledTonalButton(onClick = {
         val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Ringtone")
