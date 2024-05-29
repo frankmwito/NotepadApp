@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 
 @Dao
 interface TodoItemDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(todoItem: TodoItem)
 
