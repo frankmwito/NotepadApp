@@ -6,20 +6,35 @@ import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.net.Uri
+import android.util.Log
 
 class NotificationReceiver : BroadcastReceiver() {
+    private val LOG_TAG = "NotificationReceiver"
+
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == "STOP_RINGTONE") {
-            val notificationId = intent.getIntExtra("notificationId", -1)
-            val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.cancel(notificationId)
-            // Stop the ringtone here if it's playing
-            val ringtoneUri = intent.getStringExtra("ringtoneUri")?.let { Uri.parse(it) }
-            if (ringtoneUri != null) {
-                val ringtone = RingtoneManager.getRingtone(context, ringtoneUri)
-                if (ringtone.isPlaying) {
-                    ringtone.stop()
+        intent?.let {
+            when (it.action) {
+                "STOP_RINGTONE" -> {
+                    Log.d(LOG_TAG, "Stop action received")
+                    val notificationId = it.getIntExtra("notificationId", -1)
+                    val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(notificationId)
+
+                    val ringtoneUri = it.getStringExtra("ringtoneUri")?.let { Uri.parse(it) }
+                    ringtoneUri?.let { ringtone ->
+                        val ringtone = RingtoneManager.getRingtone(context, ringtone)
+                        if (ringtone.isPlaying) {
+                            ringtone.stop()
+                            Log.d(LOG_TAG, "Ringtone stopped")
+                        } else {
+                            Log.d(LOG_TAG, "Ringtone not playing")
+                        }
+                    } ?: run {
+                        Log.d(LOG_TAG, "Ringtone URI is null")
+                    }
                 }
+
+                else -> {}
             }
         }
     }
