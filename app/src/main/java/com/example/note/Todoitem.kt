@@ -10,7 +10,8 @@ data class TodoItem(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val description: String,
-    @TypeConverters(Converters::class)val alertTime: LocalDateTime?,
-    val ringtone: String,
+    @TypeConverters(Converters::class) val alertTime: LocalDateTime?,
+    val ringtone: String,  // Store URI as a String
     val completed: Boolean = false
 )
+
