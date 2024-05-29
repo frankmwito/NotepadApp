@@ -1,8 +1,13 @@
 package com.example.note
 
+import androidx.lifecycle.LiveData
+
 interface TodoItemRepository {
     suspend fun insert(todoItem: TodoItem)
     suspend fun update(todoItem: TodoItem)
     suspend fun delete(todoItem: TodoItem)
-    suspend fun getAllTodoItems(): List<TodoItem>
+    fun getAllTodoItems(): LiveData<List<TodoItem>>
+    fun getCompletedTodoItems(): LiveData<List<TodoItem>>
+    fun getOverdueTodoItems(): LiveData<List<TodoItem>>
+    fun getNoDateTodoItems(): LiveData<List<TodoItem>>
 }
