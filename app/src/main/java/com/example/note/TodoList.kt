@@ -57,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,17 +69,27 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
-class TodoList: ComponentActivity() {
+class TodoList : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel("todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH)
-            notificationManager.createNotificationChannel(channel)
+        createNotificationChannel()
 
+        setContent {
             Main_Screen()
         }
+    }
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            "todo_channel",
+            "To-Do Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Channel for to-do notifications"
+        }
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 }
 
@@ -102,7 +111,6 @@ fun Todolist(viewModel: TodoListViewModel) {
     val completedTodoItems by viewModel.completedTodoItems.observeAsState(emptyList())
     val overdueTodoItems by viewModel.overdueTodoItems.observeAsState(emptyList())
     val noDateTodoItems by viewModel.noDateTodoItems.observeAsState(emptyList())
-
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
         color = Color.Transparent,
@@ -112,7 +120,6 @@ fun Todolist(viewModel: TodoListViewModel) {
         color = Color.Transparent,
         darkIcons = true
     )
-
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -124,7 +131,7 @@ fun Todolist(viewModel: TodoListViewModel) {
                         text = "To-Do List",
                         fontSize = 24.sp,
                         color = Color.Black,
-                        fontStyle = FontStyle.Italic,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -139,56 +146,67 @@ fun Todolist(viewModel: TodoListViewModel) {
             )
         },
         content = { innerPadding ->
-            LazyColumn(modifier = Modifier.padding(innerPadding)) {
-                if (allTodoItems.isNotEmpty()) {
-                    item { Text("All Tasks") }
-                    items(allTodoItems) { todoItem ->
-                        TodoItemCard(todoItem, viewModel)
+            Box(modifier = Modifier.padding(innerPadding)) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 72.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    if (allTodoItems.isNotEmpty()) {
+                        item { Text("All Tasks") }
+                        items(allTodoItems) { todoItem ->
+                            TodoItemCard(todoItem, viewModel)
+                        }
+                    }
+                    if (completedTodoItems.isNotEmpty()) {
+                        item { Text("Completed Tasks") }
+                        items(completedTodoItems) { todoItem ->
+                            TodoItemCard(todoItem, viewModel)
+                        }
+                    }
+                    if (overdueTodoItems.isNotEmpty()) {
+                        item { Text("Overdue Tasks") }
+                        items(overdueTodoItems) { todoItem ->
+                            TodoItemCard(todoItem, viewModel)
+                        }
+                    }
+                    if (noDateTodoItems.isNotEmpty()) {
+                        item { Text("No Date Tasks") }
+                        items(noDateTodoItems) { todoItem ->
+                            TodoItemCard(todoItem, viewModel)
+                        }
                     }
                 }
-                if (completedTodoItems.isNotEmpty()) {
-                    item { Text("Completed Tasks") }
-                    items(completedTodoItems) { todoItem ->
-                        TodoItemCard(todoItem, viewModel)
-                    }
-                }
-                if (overdueTodoItems.isNotEmpty()) {
-                    item { Text("Overdue Tasks") }
-                    items(overdueTodoItems) { todoItem ->
-                        TodoItemCard(todoItem, viewModel)
-                    }
-                }
-                if (noDateTodoItems.isNotEmpty()) {
-                    item { Text("No Date Tasks") }
-                    items(noDateTodoItems) { todoItem ->
-                        TodoItemCard(todoItem, viewModel)
-                    }
-                }
+                FloatingActionButton(viewModel)
             }
-            FloatingActionbutton(viewModel)
         }
     )
 }
+
 @Composable
-fun FloatingActionbutton(viewModel: TodoListViewModel){
+fun FloatingActionButton(viewModel: TodoListViewModel) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
         AddTodoItemDialog(viewModel = viewModel, onDismiss = { showDialog = false })
     }
-    Box( modifier = Modifier
-        .fillMaxSize()
-        .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
-        contentAlignment = Alignment.BottomEnd ){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 75.dp), // Add padding to keep FAB above navigation bar
+        contentAlignment = Alignment.BottomEnd
+    ) {
         ExtendedFloatingActionButton(
             text = { Text(text = "New Task", color = Color.Black) },
             icon = { Icon(imageVector = Icons.Default.NoteAdd, contentDescription = "Create a new Task", tint = Color.Black) },
-            onClick = {showDialog = true },
+            onClick = { showDialog = true },
             containerColor = Color(0xFFCCC2DC),
             modifier = Modifier.padding(16.dp)
         )
     }
 }
+
 @Composable
 fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
     Card(
@@ -215,7 +233,8 @@ fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = todoItem.description)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = todoItem.alertTime.toString())
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                    todoItem.alertTime?.format(formatter)?.let { Text(text = it) }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
@@ -232,11 +251,11 @@ fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
     val context = LocalContext.current
 
     val datePickerDialog = createDatePickerDialog(context) { date ->
-        alertTime = alertTime?.withDate(date) ?: date.atStartOfDay()
+        alertTime = alertTime?.withDate(date)?: date.atStartOfDay()
     }
 
     val timePickerDialog = createTimePickerDialog(context) { time ->
-        alertTime = alertTime?.withTime(time) ?: LocalDate.now().atTime(time)
+        alertTime = alertTime?.withTime(time)?: LocalDate.now().atTime(time)
     }
 
     AlertDialog(
@@ -274,7 +293,15 @@ fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
                         title = title,
                         description = description,
                         alertTime = alertTime,
-                        ringtone = ringtoneUri?.toString() ?: "",
+                        ringtone = ringtoneUri?.toString()?: "",
+                        completed = false
+                    ))
+                    scheduleNotification(context, TodoItem(
+                        id = 0,
+                        title = title,
+                        description = description,
+                        alertTime = alertTime,
+                        ringtone = ringtoneUri?.toString()?: "",
                         completed = false
                     ))
                     onDismiss()
@@ -354,5 +381,4 @@ fun scheduleNotification(context: Context, todoItem: TodoItem) {
 
     WorkManager.getInstance(context).enqueue(notificationWork)
 }
-
 
