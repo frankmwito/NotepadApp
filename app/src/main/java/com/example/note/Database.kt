@@ -7,10 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(entities = [Note::class, TodoItem::class], version = 2, exportSchema = true)
-@TypeConverters(Converters::class)
+@TypeConverters(UriConverter::class, Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
-    abstract  fun todoitemDao(): TodoItemDao
+    abstract fun todoItemDao(): TodoItemDao
 
     companion object {
         @Volatile
@@ -32,9 +32,10 @@ abstract class AppDatabase : RoomDatabase() {
             val database = getInstance(context)
             return NoteRepositoryImpl(database.noteDao())
         }
+
         fun provideTodoItemRepository(context: Context): TodoItemRepository {
             val database = getInstance(context)
-            return TodoItemRepositoryImpl(database.todoitemDao())
+            return TodoItemRepositoryImpl(database.todoItemDao())
         }
     }
 }
