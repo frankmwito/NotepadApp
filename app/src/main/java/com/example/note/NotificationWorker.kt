@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -35,47 +34,35 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Stop Ringtone Intent
+        val stopRingtoneIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
+            action = "STOP_RINGTONE"
+            putExtra("notificationId", 1)
+        }
+        val stopRingtonePendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            0,
+            stopRingtoneIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Build Notification
         val notificationBuilder = NotificationCompat.Builder(applicationContext, "todo_channel")
             .setContentTitle(title)
             .setContentText(description)
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
-
-        // Set a delete intent to stop the ringtone when the notification is dismissed
-        val stopRingtoneIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
-            action = "STOP_RINGTONE"
-            putExtra("notificationId", 1)
-            putExtra("ringtoneUri", ringtoneUri.toString())
-        }
-        val stopRingtonePendingIntent = PendingIntent.getBroadcast(
-            applicationContext,
-            0,
-            stopRingtoneIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        notificationBuilder.setDeleteIntent(stopRingtonePendingIntent)
-
-        // Add a delete action to the notification
-        val deleteIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
-            action = "DELETE_NOTIFICATION"
-            putExtra("notificationId", 1)
-        }
-        val deletePendingIntent = PendingIntent.getBroadcast(
-            applicationContext,
-            0,
-            deleteIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        notificationBuilder.addAction(R.drawable.ic_stop, "Stop", deletePendingIntent)
+            .setDeleteIntent(stopRingtonePendingIntent) // Trigger stop when notification is dismissed
+            .addAction(R.drawable.ic_stop, "Stop", stopRingtonePendingIntent) // Action button to stop
 
         notificationManager.notify(1, notificationBuilder.build())
 
-        // Play ringtone
+        // Play Ringtone
         ringtoneUri?.let {
-            val ringtone = RingtoneManager.getRingtone(applicationContext, it)
-            ringtone.play()
+            RingtonePlayer.play(applicationContext, it)
         }
     }
 }
+
 

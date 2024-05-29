@@ -24,7 +24,7 @@
         <receiver
             android:name=".NotificationReceiver"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:priority="100"> <!-- Set a higher priority -->
         </receiver>
         <activity
