@@ -29,4 +29,3 @@ object RingtonePlayer {
         mediaPlayer = null
     }
 }
-
