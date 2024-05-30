@@ -46,6 +46,18 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Remind Later Intent
+        val remindLaterIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
+            action = "REMIND_LATER"
+            putExtra("notificationId", 1)
+        }
+        val remindLaterPendingIntent = PendingIntent.getBroadcast(
+            applicationContext,
+            0,
+            remindLaterIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         // Build Notification
         val notificationBuilder = NotificationCompat.Builder(applicationContext, "todo_channel")
             .setContentTitle(title)
@@ -55,6 +67,7 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             .setAutoCancel(true)
             .setDeleteIntent(stopRingtonePendingIntent) // Trigger stop when notification is dismissed
             .addAction(R.drawable.ic_stop, "Stop", stopRingtonePendingIntent) // Action button to stop
+            .addAction(R.drawable.ic_stop, "Remind me in 10 minutes", remindLaterPendingIntent) // Action button to remind later
 
         notificationManager.notify(1, notificationBuilder.build())
 
