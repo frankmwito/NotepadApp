@@ -500,7 +500,34 @@ fun DeleteConfirmationDialog(
         )
     }
 }
-
+/**
+@Composable
+fun CategoryFilter(){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        OutlinedButton(
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(
+                unselectedColor = Color.Transparent,
+                selectedColor = Color(0xFFCCC2DC)
+            )
+        ) {
+            Text(text = "Journals")
+        }
+        OutlinedButton(
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(
+                unselectedColor = Color.Transparent,
+                selectedColor = Color(0xFFCCC2DC)
+            )
+        ) {
+            Text(text = "Notes")
+        }
+    }
+}**/
     @RequiresApi(Build.VERSION_CODES.O)
     @Composable
     fun NotesList(viewModel: NotesViewModel) {
