@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -18,18 +19,21 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         val ringtoneUriString = inputData.getString("ringtone")
         val ringtoneUri = ringtoneUriString?.let { Uri.parse(it) }
 
-        showNotification(title, description, ringtoneUri)
+        showNotification(title, description, ringtoneUri, ringtoneUriString)
 
         return Result.success()
     }
 
-    private fun showNotification(title: String?, description: String?, ringtoneUri: Uri?) {
+    private fun showNotification(title: String?, description: String?, ringtoneUri: Uri?, ringtoneUriString: String?) {
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create a notification channel if it doesn't exist
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel("todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
                 this.description = "Channel for to-do notifications"
+                enableLights(true)
+                lightColor = Color.RED
+                enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -50,10 +54,13 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         val remindLaterIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
             action = "REMIND_LATER"
             putExtra("notificationId", 1)
+            putExtra("title", title)
+            putExtra("description", description)
+            putExtra("ringtone", ringtoneUriString)
         }
         val remindLaterPendingIntent = PendingIntent.getBroadcast(
             applicationContext,
-            0,
+            1,
             remindLaterIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -67,7 +74,10 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             .setAutoCancel(true)
             .setDeleteIntent(stopRingtonePendingIntent) // Trigger stop when notification is dismissed
             .addAction(R.drawable.ic_stop, "Stop", stopRingtonePendingIntent) // Action button to stop
-            .addAction(R.drawable.ic_stop, "Remind me in 10 minutes", remindLaterPendingIntent) // Action button to remind later
+            .addAction(R.drawable.ic_notification, "Remind me in 10 minutes", remindLaterPendingIntent) // Action button to remind later
+            .setDefaults(NotificationCompat.DEFAULT_ALL) // Set default notification behaviors
+            .setCategory(NotificationCompat.CATEGORY_ALARM) // Set category to alarm
+            .setFullScreenIntent(PendingIntent.getActivity(applicationContext, 0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE), true) // Light up screen
 
         notificationManager.notify(1, notificationBuilder.build())
 
@@ -77,6 +87,7 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         }
     }
 }
+
 
 
 
