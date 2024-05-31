@@ -24,6 +24,10 @@ class NotificationReceiver : BroadcastReceiver() {
         } else if (intent?.action == "REMIND_LATER") {
             Log.d("NotificationReceiver", "Remind later action received")
             val notificationId = intent.getIntExtra("notificationId", -1)
+            val title = intent.getStringExtra("title")
+            val description = intent.getStringExtra("description")
+            val ringtoneUriString = intent.getStringExtra("ringtone")
+
             val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(notificationId)
 
@@ -33,13 +37,21 @@ class NotificationReceiver : BroadcastReceiver() {
 
             // Schedule a new notification for 10 minutes later
             val remindLaterWorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-                .setInputData(workDataOf("title" to "Your Title", "description" to "Your Description", "ringtone" to "Your Ringtone URI"))
+                .setInputData(
+                    workDataOf(
+                        "title" to title,
+                        "description" to description,
+                        "ringtone" to ringtoneUriString
+                    )
+                )
                 .setInitialDelay(10, TimeUnit.MINUTES)
                 .build()
             WorkManager.getInstance(context).enqueue(remindLaterWorkRequest)
         }
     }
 }
+
+
 
 
 
