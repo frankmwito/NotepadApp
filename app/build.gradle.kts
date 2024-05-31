@@ -64,6 +64,7 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.2.1")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("com.google.android.libraries.places:places:3.4.0")
+    implementation("androidx.wear.compose:compose-material:1.3.1")
     ksp("com.google.dagger:hilt-android-compiler:2.44")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
