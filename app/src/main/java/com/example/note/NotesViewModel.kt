@@ -23,10 +23,15 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     )
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun insertNote(title: String, body: String) {
+    fun insertNote(title: String, body: String, category: String) {
+        if (title.isBlank() || category.isBlank()) {
+            // Handle error, e.g., show a toast message
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             val currentTime = Clock.systemDefaultZone().instant()
-            val note = Note(id = 0, title = title, body = body, timestamp = currentTime.toEpochMilli())
+            val note = Note(id = 0, title = title, body = body, category = category, timestamp = currentTime.toEpochMilli())
             noteRepository.insert(note)
         }
     }
