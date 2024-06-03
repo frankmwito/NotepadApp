@@ -7,6 +7,7 @@ data class Note(
     @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val body: String,
+    val category: String,
     val timestamp: Long = System.currentTimeMillis()
 )
 
