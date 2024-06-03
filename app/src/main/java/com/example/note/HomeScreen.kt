@@ -2,12 +2,10 @@ package com.example.note
 
 //noinspection UsingMaterialAndMaterial3Libraries
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +38,10 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -73,7 +74,6 @@ import java.util.Locale
 
 class HomeScreen : ComponentActivity() {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -84,7 +84,6 @@ class HomeScreen : ComponentActivity() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
     val viewModel: NotesViewModel = viewModel()
@@ -97,13 +96,14 @@ fun MainScreen() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Home_Screen(viewModel: NotesViewModel) {
     var showSearchDialog by remember { mutableStateOf(false) }
     var sortBy by remember { mutableStateOf("timestamp") }
     var sortOrder by remember { mutableStateOf(NoteRepository.SortOrder.ASC) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf("All") }
+
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
         color = Color.Transparent,
@@ -149,20 +149,17 @@ fun Home_Screen(viewModel: NotesViewModel) {
             )
         },
         content = { innerPadding ->
-            Box(
+            Column(
                 modifier = Modifier.padding(innerPadding)
             ) {
-                val sortedNotes by viewModel.sortedNotes.collectAsState()
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 72.dp)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    items(sortedNotes) { note ->
-                        NoteCard(note = note, viewModel = viewModel)
+                CategoryTabs(
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = { category ->
+                        selectedCategory = category
+                        // Filter notes based on category
                     }
-                }
+                )
+                NotesList(viewModel, selectedCategory)
                 if (showSearchDialog) {
                     FullScreenSearchDialog(
                         viewModel = viewModel,
@@ -174,6 +171,40 @@ fun Home_Screen(viewModel: NotesViewModel) {
         }
     )
 }
+
+@Composable
+fun CategoryTabs(selectedCategory: String, onCategorySelected: (String) -> Unit) {
+    val categories = listOf("All", "Journals", "Notes")
+    var selectedTabIndex by remember { mutableStateOf(categories.indexOf(selectedCategory)) }
+
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = Modifier.fillMaxWidth()
+            .background(Color.Transparent),
+        contentColor = MaterialTheme.colorScheme.primary,
+
+    ) {
+        categories.forEachIndexed { index, categoryText ->
+            Tab(
+                selected = selectedTabIndex == index,
+                onClick = {
+                    selectedTabIndex = index
+                    onCategorySelected(categoryText)
+                },
+                text = {
+                    Text(
+                        text = categoryText,
+                        fontSize = 16.sp,
+                        color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                }
+            )
+        }
+    }
+}
+
 
 @Composable
 fun SortDropdownMenu(
@@ -260,7 +291,6 @@ fun Floatingactionbutton(){
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullScreenSearchDialog(
@@ -310,7 +340,6 @@ fun FullScreenSearchDialog(
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NoteCard(note: Note, viewModel: NotesViewModel) {
     val coroutineScope = rememberCoroutineScope()
@@ -500,48 +529,26 @@ fun DeleteConfirmationDialog(
         )
     }
 }
-/**
-@Composable
-fun CategoryFilter(){
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        OutlinedButton(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(
-                unselectedColor = Color.Transparent,
-                selectedColor = Color(0xFFCCC2DC)
-            )
-        ) {
-            Text(text = "Journals")
-        }
-        OutlinedButton(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(
-                unselectedColor = Color.Transparent,
-                selectedColor = Color(0xFFCCC2DC)
-            )
-        ) {
-            Text(text = "Notes")
-        }
-    }
-}**/
-    @RequiresApi(Build.VERSION_CODES.O)
-    @Composable
-    fun NotesList(viewModel: NotesViewModel) {
-        val notes by viewModel.sortedNotes.collectAsState()
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 72.dp)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            items(notes) { note ->
-                NoteCard(note = note, viewModel = viewModel)
-            }
+@Composable
+fun NotesList(viewModel: NotesViewModel, selectedCategory: String) {
+    val sortedNotes by viewModel.sortedNotes.collectAsState()
+
+    val filteredNotes = if (selectedCategory == "All") {
+        sortedNotes
+    } else {
+        sortedNotes.filter { it.category == selectedCategory }
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 82.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        items(filteredNotes) { note ->
+            NoteCard(note = note, viewModel = viewModel)
         }
     }
+}
 
