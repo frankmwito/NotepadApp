@@ -19,8 +19,8 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
     private val _allTodoItems = MutableLiveData<List<TodoItem>>()
     val allTodoItems: LiveData<List<TodoItem>> get() = _allTodoItems
 
-    private val _completedTodoItems = MutableLiveData<List<TodoItem>>()
-    val completedTodoItems: LiveData<List<TodoItem>> get() = _completedTodoItems
+    private val _achievedTodoItems = MutableLiveData<List<TodoItem>>()
+    val achievedTodoItems: LiveData<List<TodoItem>> get() = _achievedTodoItems
 
     private val _overdueTodoItems = MutableLiveData<List<TodoItem>>()
     val overdueTodoItems: LiveData<List<TodoItem>> get() = _overdueTodoItems
@@ -38,7 +38,7 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
                 Log.d("TodoListViewModel", "Loaded items: $items")
 
                 _allTodoItems.postValue(items)
-                _completedTodoItems.postValue(items.filter { it.completed })
+                _achievedTodoItems.postValue(items.filter { it.completed })
                 _overdueTodoItems.postValue(items.filter { it.alertTime?.isBefore(LocalDateTime.now()) == true && !it.completed })
                 _noDateTodoItems.postValue(items.filter { it.alertTime == null && !it.completed })
             }
