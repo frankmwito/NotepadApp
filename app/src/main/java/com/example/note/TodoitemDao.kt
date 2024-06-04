@@ -28,7 +28,7 @@ interface TodoItemDao {
     fun getAllTodoItems(): LiveData<List<TodoItem>>
 
     @Query("SELECT * FROM todoitems WHERE completed = 1")
-    fun getCompletedTodoItems(): LiveData<List<TodoItem>>
+    fun getAchievedTodoItems(): LiveData<List<TodoItem>>
 
     @Query("SELECT * FROM todoitems WHERE alertTime < :now AND completed = 0")
     fun getOverdueTodoItems(now: LocalDateTime): LiveData<List<TodoItem>>
