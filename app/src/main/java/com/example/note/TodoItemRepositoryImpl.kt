@@ -27,12 +27,11 @@ class TodoItemRepositoryImpl(private val todoItemDao: TodoItemDao) : TodoItemRep
         return items
     }
 
-    override fun getCompletedTodoItems(): LiveData<List<TodoItem>> {
-        val items = todoItemDao.getCompletedTodoItems()
+    override fun getAchiviedTodoItems(): LiveData<List<TodoItem>> {
+        val items = todoItemDao.getAchievedTodoItems()
         Log.d("TodoItemRepositoryImpl", "Retrieved completed items")
         return items
     }
-
     override fun getOverdueTodoItems(): LiveData<List<TodoItem>> {
         val now = LocalDateTime.now()
         val items = todoItemDao.getOverdueTodoItems(now)
