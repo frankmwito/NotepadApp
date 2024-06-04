@@ -7,7 +7,7 @@ interface TodoItemRepository {
     suspend fun update(todoItem: TodoItem)
     suspend fun delete(todoItem: TodoItem)
     fun getAllTodoItems(): LiveData<List<TodoItem>>
-    fun getCompletedTodoItems(): LiveData<List<TodoItem>>
+    fun getAchiviedTodoItems(): LiveData<List<TodoItem>>
     fun getOverdueTodoItems(): LiveData<List<TodoItem>>
     fun getNoDateTodoItems(): LiveData<List<TodoItem>>
 }
