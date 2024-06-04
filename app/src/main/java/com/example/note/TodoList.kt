@@ -41,9 +41,12 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -57,6 +60,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -108,10 +113,11 @@ fun Main_Screen() {
 @Composable
 fun Todolist(viewModel: TodoListViewModel) {
     val allTodoItems by viewModel.allTodoItems.observeAsState(emptyList())
-    val completedTodoItems by viewModel.completedTodoItems.observeAsState(emptyList())
+    val achievedTodoItems by viewModel.achievedTodoItems.observeAsState(emptyList())
     val overdueTodoItems by viewModel.overdueTodoItems.observeAsState(emptyList())
     val noDateTodoItems by viewModel.noDateTodoItems.observeAsState(emptyList())
     val systemUiController = rememberSystemUiController()
+
     systemUiController.setStatusBarColor(
         color = Color.Transparent,
         darkIcons = true
@@ -120,6 +126,11 @@ fun Todolist(viewModel: TodoListViewModel) {
         color = Color.Transparent,
         darkIcons = true
     )
+
+    var selectedTabIndex by remember { mutableStateOf(0) }
+
+    val tabs = listOf("All", "Archived", "Overdue", "No Date")
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -146,39 +157,57 @@ fun Todolist(viewModel: TodoListViewModel) {
             )
         },
         content = { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 72.dp)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    if (allTodoItems.isNotEmpty()) {
-                        item { Text("All Tasks") }
-                        items(allTodoItems) { todoItem ->
-                            TodoItemCard(todoItem, viewModel)
-                        }
-                    }
-                    if (completedTodoItems.isNotEmpty()) {
-                        item { Text("Completed Tasks") }
-                        items(completedTodoItems) { todoItem ->
-                            TodoItemCard(todoItem, viewModel)
-                        }
-                    }
-                    if (overdueTodoItems.isNotEmpty()) {
-                        item { Text("Overdue Tasks") }
-                        items(overdueTodoItems) { todoItem ->
-                            TodoItemCard(todoItem, viewModel)
-                        }
-                    }
-                    if (noDateTodoItems.isNotEmpty()) {
-                        item { Text("No Date Tasks") }
-                        items(noDateTodoItems) { todoItem ->
-                            TodoItemCard(todoItem, viewModel)
-                        }
+            Column(modifier = Modifier.padding(innerPadding)) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier.fillMaxWidth()
+                        .background(Color.Transparent),
+                    contentColor = MaterialTheme.colorScheme.primary) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title,
+                                fontSize = 16.sp,
+                                color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                                fontStyle = FontStyle.Italic,
+                                fontFamily = FontFamily.SansSerif)
+                            }
+                        )
                     }
                 }
-                FloatingActionButton(viewModel)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 72.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        when (selectedTabIndex) {
+                            0 -> { // All
+                                items(allTodoItems) { todoItem ->
+                                    TodoItemCard(todoItem, viewModel)
+                                }
+                            }
+                            1 -> { // Completed
+                                items(achievedTodoItems) { todoItem ->
+                                    TodoItemCard(todoItem, viewModel)
+                                }
+                            }
+                            2 -> { // Overdue
+                                items(overdueTodoItems) { todoItem ->
+                                    TodoItemCard(todoItem, viewModel)
+                                }
+                            }
+                            3 -> { // No Date
+                                items(noDateTodoItems) { todoItem ->
+                                    TodoItemCard(todoItem, viewModel)
+                                }
+                            }
+                        }
+                    }
+                    FloatingActionButton(viewModel)
+                }
             }
         }
     )
