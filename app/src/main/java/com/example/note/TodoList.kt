@@ -1,20 +1,14 @@
 package com.example.note
 
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,20 +19,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -160,7 +149,8 @@ fun Todolist(viewModel: TodoListViewModel) {
             Column(modifier = Modifier.padding(innerPadding)) {
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .background(Color.Transparent),
                     contentColor = MaterialTheme.colorScheme.primary) {
                     tabs.forEachIndexed { index, title ->
@@ -206,7 +196,7 @@ fun Todolist(viewModel: TodoListViewModel) {
                             }
                         }
                     }
-                    FloatingActionButton(viewModel)
+                    FloatingActionButton()
                 }
             }
         }
@@ -214,12 +204,8 @@ fun Todolist(viewModel: TodoListViewModel) {
 }
 
 @Composable
-fun FloatingActionButton(viewModel: TodoListViewModel) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    if (showDialog) {
-        AddTodoItemDialog(viewModel = viewModel, onDismiss = { showDialog = false })
-    }
+fun FloatingActionButton() {
+    val ctx = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -229,7 +215,9 @@ fun FloatingActionButton(viewModel: TodoListViewModel) {
         ExtendedFloatingActionButton(
             text = { Text(text = "New Task", color = Color.Black) },
             icon = { Icon(imageVector = Icons.Default.NoteAdd, contentDescription = "Create a new Task", tint = Color.Black) },
-            onClick = { showDialog = true },
+            onClick = { val intent = Intent(ctx, Newlist::class.java)
+                ctx.startActivity(intent)
+            },
             containerColor = Color(0xFFCCC2DC),
             modifier = Modifier.padding(16.dp)
         )
@@ -258,19 +246,28 @@ fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
                     colors = RadioButtonDefaults.colors(unselectedColor = Color.Black, selectedColor = Color(0xFFCCC2DC))
                 )
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = todoItem.title)
+                    Text(text = todoItem.title,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.SansSerif,
+                        color = Color.Black)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = todoItem.description)
+                    Text(text = todoItem.description,
+                        fontStyle = FontStyle.Normal,
+                        fontFamily = FontFamily.SansSerif,
+                        color = Color.Black)
                     Spacer(modifier = Modifier.height(8.dp))
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                    todoItem.alertTime?.format(formatter)?.let { Text(text = it) }
+                    todoItem.alertTime?.format(formatter)?.let { Text(text = it,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.DarkGray) }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
     }
 }
-
+/**
 @Composable
 fun AddTodoItemDialog(viewModel: TodoListViewModel, onDismiss: () -> Unit) {
     var title by remember { mutableStateOf("") }
@@ -369,7 +366,7 @@ fun RingtonePicker(onRingtoneSelected: (Uri) -> Unit) {
     }) {
         Text("Pick Ringtone")
     }
-}
+}**/
 
 // DatePicker and TimePicker Functions
 fun createDatePickerDialog(context: Context, onDateSelected: (LocalDate) -> Unit): DatePickerDialog {
