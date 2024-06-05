@@ -118,7 +118,7 @@ fun Todolist(viewModel: TodoListViewModel) {
 
     var selectedTabIndex by remember { mutableStateOf(0) }
 
-    val tabs = listOf("All", "Archived", "Overdue", "No Date")
+    val tabs = listOf("All", "Achieved", "Overdue", "No Date")
 
     Scaffold(
         modifier = Modifier
