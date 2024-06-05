@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,20 +60,20 @@ class Newlist : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
-           newList( viewModel = viewModel(),
-               onBackPressed = { onBackPressed()}
-           )
-            }
+            newList(
+                viewModel = viewModel(),
+                onBackPressed = { onBackPressedDispatcher.onBackPressed() }
+            )
         }
     }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun newList(viewModel: TodoListViewModel, onBackPressed: () -> Unit) {
-    val title by remember { mutableStateOf("") }
-    val description by remember { mutableStateOf("") }
-    val alertTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    val title = remember { mutableStateOf("") }
+    val description = remember { mutableStateOf("") }
+    val alertTime = remember { mutableStateOf<LocalDateTime?>(null) }
     var ringtoneUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
@@ -85,80 +86,84 @@ fun newList(viewModel: TodoListViewModel, onBackPressed: () -> Unit) {
         color = Color.Transparent,
         darkIcons = true
     )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "New Task",
+                    Text(
+                        text = "New Task",
                         fontSize = 24.sp,
                         color = Color.Black,
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
                         modifier = Modifier.padding(8.dp)
-                        )
+                    )
                 },
                 navigationIcon = {
-                                 IconButton(onClick = { onBackPressed }) {
-                                     Icon(imageVector = Icons.Default.ArrowBack ,
-                                         contentDescription = ("Back"))
-
-                                 }
+                    IconButton(onClick = { onBackPressed() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
                 },
                 actions = {
-                    IconButton(onClick = {  if (title.isNotEmpty() && description.isNotEmpty()) {
-                        viewModel.insert(TodoItem(
-                            id = 0,
-                            title = title,
-                            description = description,
-                            alertTime = alertTime,
-                            ringtone = ringtoneUri?.toString()?: "",
-                            completed = false
-                        ))
-                        scheduleNotification(context, TodoItem(
-                            id = 0,
-                            title = title,
-                            description = description,
-                            alertTime = alertTime,
-                            ringtone = ringtoneUri?.toString()?: "",
-                            completed = false
-                        ))
-                       //onDismiss()
-                    } else {
-                        Toast.makeText(context, "Title and Description cannot be empty", Toast.LENGTH_SHORT).show()
-                    } }) {
-                        Icon(imageVector = Icons.Filled.SaveAlt,
-                            contentDescription = "Save" )
-
+                    IconButton(onClick = {
+                        if (title.value.isNotEmpty() && description.value.isNotEmpty()) {
+                            val todoItem = TodoItem(
+                                id = 0,
+                                title = title.value,
+                                description = description.value,
+                                alertTime = alertTime.value,
+                                ringtone = ringtoneUri?.toString() ?: "",
+                                completed = false
+                            )
+                            viewModel.insert(todoItem)
+                            if (alertTime.value != null) {
+                                scheduleNotification(context, todoItem)
+                            }
+                            onBackPressed()
+                        } else {
+                            Toast.makeText(context, "Title and Description cannot be empty", Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.SaveAlt,
+                            contentDescription = "Save"
+                        )
                     }
                 }
             )
-
-            },
-        content = {innerPadding ->
+        },
+        content = { innerPadding ->
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
                     .padding(8.dp)
-            ){
-                DateTimeRingtone(onRingtoneSelected = { uri -> ringtoneUri = uri })
-                Textfields()
+            ) {
+                DateTimeRingtone(
+                    alertTime = alertTime,
+                    onRingtoneSelected = { uri -> ringtoneUri = uri }
+                )
+                Textfields(title = title, description = description)
             }
         }
     )
 }
 
 @Composable
-fun DateTimeRingtone(onRingtoneSelected: (Uri) -> Unit){
-    var alertTime by remember { mutableStateOf<LocalDateTime?>(null) }
+fun DateTimeRingtone(alertTime: MutableState<LocalDateTime?>, onRingtoneSelected: (Uri) -> Unit) {
     val context = LocalContext.current
     val datePickerDialog = createDatePickerDialog(context) { date ->
-        alertTime = alertTime?.withDate(date)?: date.atStartOfDay()
+        alertTime.value = alertTime.value?.with(date) ?: date.atStartOfDay()
     }
 
     val timePickerDialog = createTimePickerDialog(context) { time ->
-        alertTime = alertTime?.withTime(time)?: LocalDate.now().atTime(time)
+        alertTime.value = alertTime.value?.with(time) ?: LocalDate.now().atTime(time)
     }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,16 +171,18 @@ fun DateTimeRingtone(onRingtoneSelected: (Uri) -> Unit){
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        FilledTonalButton(onClick = { datePickerDialog.show() })
-        {
-            Text(text = "Pick Date",
-                color = Color.Black)
+        FilledTonalButton(onClick = { datePickerDialog.show() }) {
+            Text(
+                text = "Pick Date",
+                color = Color.Black
+            )
         }
         Spacer(modifier = Modifier.width(5.dp))
-        FilledTonalButton(onClick = {timePickerDialog.show() })
-        {
-            Text(text = "Pick Time",
-                color = Color.Black)
+        FilledTonalButton(onClick = { timePickerDialog.show() }) {
+            Text(
+                text = "Pick Time",
+                color = Color.Black
+            )
         }
         Spacer(modifier = Modifier.width(5.dp))
         val ringtoneLauncher = rememberLauncherForActivityResult(
@@ -186,34 +193,34 @@ fun DateTimeRingtone(onRingtoneSelected: (Uri) -> Unit){
                 uri?.let { onRingtoneSelected(it) }
             }
         }
-        FilledTonalButton(
-            onClick =
-            { val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
+        FilledTonalButton(onClick = {
+            val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Ringtone")
-            ringtoneLauncher.launch(intent) })
-        {
-            Text(text = "Ringtone",
-                color = Color.Black)
+            ringtoneLauncher.launch(intent)
+        }) {
+            Text(
+                text = "Ringtone",
+                color = Color.Black
+            )
         }
     }
 }
 
 @Composable
-fun Textfields() {
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+fun Textfields(title: MutableState<String>, description: MutableState<String>) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp)
             .offset(y = 70.dp)
     ) {
         TextField(
-            value = title,
-            onValueChange =  {title = it},
+            value = title.value,
+            onValueChange = { title.value = it },
             label = {
-                androidx.compose.material3.Text(
-                    "Title",
+                Text(
+                    text = "Title",
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontStyle = FontStyle.Italic,
@@ -229,18 +236,18 @@ fun Textfields() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextField(
-            value = description,
-            onValueChange = {description = it},
+            value = description.value,
+            onValueChange = { description.value = it },
             label = {
                 Text(
-                    text = "description",
+                    text = "Description",
                     fontSize = 16.sp,
                     color = Color.Black,
                     fontStyle = FontStyle.Italic,
-                    fontFamily = FontFamily.SansSerif)
+                    fontFamily = FontFamily.SansSerif
+                )
             },
-            modifier = Modifier.fillMaxWidth(),
-            )
+            modifier = Modifier.fillMaxWidth()
+        )
     }
-
 }
