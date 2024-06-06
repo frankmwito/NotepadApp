@@ -48,6 +48,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class Noteadd : ComponentActivity() {
     private val viewModel: NotesViewModel by viewModels()
@@ -73,6 +74,15 @@ fun NotesAdd(viewModel: NotesViewModel, onBackPressed: () -> Unit) {
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
     val category = remember { mutableStateOf("Journal") } // Default category
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color.Transparent,
+        darkIcons = true
+    )
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            darkIcons = true
+        )
 
     Scaffold(
         topBar = {
