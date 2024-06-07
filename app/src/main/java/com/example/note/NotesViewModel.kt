@@ -3,6 +3,7 @@ package com.example.note
 import android.app.Application
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,16 +23,25 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         emptyList()
     )
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     fun insertNote(title: String, body: String, category: String) {
         if (title.isBlank() || category.isBlank()) {
-            // Handle error, e.g., show a toast message
+            // Show a toast message on the main thread
+            viewModelScope.launch(Dispatchers.Main) {
+                Toast.makeText(getApplication(), "Title and category cannot be blank", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             val currentTime = Clock.systemDefaultZone().instant()
-            val note = Note(id = 0, title = title, body = body, category = category, timestamp = currentTime.toEpochMilli())
+            val note = Note(
+                id = 0,
+                title = title,
+                body = body,
+                category = category,
+                timestamp = currentTime.toEpochMilli()
+            )
             noteRepository.insert(note)
         }
     }
