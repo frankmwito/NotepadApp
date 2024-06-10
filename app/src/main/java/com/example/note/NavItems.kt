@@ -21,11 +21,6 @@ data class NavItem(
             label = "ToDoList",
             icon = Icons.Default.NoteAdd,
             route = Screens.TodoList.name
-        ),
-        NavItem(
-            label = "Schedules",
-            icon = Icons.Default.Timer,
-            route = Screens.Shedular.name
         )
     )
 

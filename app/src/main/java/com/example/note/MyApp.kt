@@ -9,10 +9,7 @@ import androidx.work.WorkManager
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        // Initialize WorkManager
-        WorkManager.initialize(
-            this,
-            Configuration.Builder().setMinimumLoggingLevel(Log.DEBUG).build()
-        )
+        // Initialize WorkManager with the default configuration
+        WorkManager.initialize(this, Configuration.Builder().build())
     }
 }
