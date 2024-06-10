@@ -35,4 +35,18 @@ interface TodoItemDao {
 
     @Query("SELECT * FROM todoitems WHERE alertTime IS NULL AND completed = 0")
     fun getNoDateTodoItems(): LiveData<List<TodoItem>>
+
+    @Query("SELECT * FROM todoitems WHERE title LIKE :query OR description LIKE :query")
+    suspend fun searchTodoItems(query: String): List<TodoItem>
+
+    @Query("SELECT * FROM todoitems ORDER BY title")
+    suspend fun sortTodoItemsByTitle(): List<TodoItem>
+
+    @Query("SELECT * FROM todoitems ORDER BY alertTime")
+    suspend fun sortTodoItemsByDate(): List<TodoItem>
+
+    @Query("SELECT * FROM todoitems ORDER BY completed")
+    suspend fun sortTodoItemsByCategory(): List<TodoItem>
 }
+
+
