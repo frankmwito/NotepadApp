@@ -99,9 +99,6 @@ fun App_Navigation() {
                 composable(route = Screens.TodoList.name){
                     Main_Screen()
                 }
-                composable(route = Screens.Shedular.name){
-                    Shedules()
-                }
             })
     }
 }
