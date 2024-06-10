@@ -77,7 +77,14 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             .addAction(R.drawable.ic_notification, "Remind me in 10 minutes", remindLaterPendingIntent) // Action button to remind later
             .setDefaults(NotificationCompat.DEFAULT_ALL) // Set default notification behaviors
             .setCategory(NotificationCompat.CATEGORY_ALARM) // Set category to alarm
-            .setFullScreenIntent(PendingIntent.getActivity(applicationContext, 0, Intent(), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE), true) // Light up screen
+            .setFullScreenIntent(
+                PendingIntent.getActivity(
+                    applicationContext,
+                    0,
+                    Intent(),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                ), true
+            )
 
         notificationManager.notify(1, notificationBuilder.build())
 
@@ -87,7 +94,6 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         }
     }
 }
-
 
 
 

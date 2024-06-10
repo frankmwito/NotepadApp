@@ -46,10 +46,11 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
                 .setInitialDelay(10, TimeUnit.MINUTES)
                 .build()
-            WorkManager.getInstance(context).enqueue(remindLaterWorkRequest)
+            WorkManager.getInstance(context!!).enqueue(remindLaterWorkRequest)
         }
     }
 }
+
 
 
 
