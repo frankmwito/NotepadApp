@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.note.ui.theme.NoteTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class AppNavigation : ComponentActivity() {
@@ -34,8 +35,10 @@ class AppNavigation : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            App_Navigation()
+            NoteTheme {
+                App_Navigation()
             }
+        }
         }
     }
 
@@ -44,18 +47,9 @@ class AppNavigation : ComponentActivity() {
 @Composable
 fun App_Navigation() {
     val navController: NavHostController = rememberNavController()
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setStatusBarColor(
-        color = Color.Transparent,
-        darkIcons = true // Set true if using a light status bar
-    )
-    systemUiController.setNavigationBarColor(
-        color = Color.Transparent,
-        darkIcons = true // Set true if using a light navigation bar
-    )
-
     Scaffold(
-        modifier = Modifier.background(color = Color.White)
+        modifier = Modifier
+            .background(color = Color.White)
             .fillMaxSize(),
         bottomBar = {
             NavigationBar {
