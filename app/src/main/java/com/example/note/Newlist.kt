@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.Text
+import com.example.note.ui.theme.NoteTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -60,11 +61,13 @@ class Newlist : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            NoteTheme {
             newList(
                 viewModel = viewModel(),
                 onBackPressed = { onBackPressedDispatcher.onBackPressed() }
             )
         }
+    }
     }
 }
 

@@ -121,7 +121,6 @@ fun Home_Screen(viewModel: NotesViewModel) {
                     Text(
                         text = "My Notes",
                         fontSize = 24.sp,
-                        color = Color.Black,
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif
@@ -179,9 +178,7 @@ fun CategoryTabs(selectedCategory: String, onCategorySelected: (String) -> Unit)
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
-        modifier = Modifier.fillMaxWidth()
-            .background(Color.Transparent),
-        contentColor = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.fillMaxWidth(),
 
     ) {
         categories.forEachIndexed { index, categoryText ->
@@ -285,7 +282,6 @@ fun Floatingactionbutton(){
                     val intent = Intent(ctx, Noteadd::class.java)
                     ctx.startActivity(intent)
                 },
-                containerColor = Color(0xFFCCC2DC),
                 modifier = Modifier.padding(16.dp)
             )
     }
