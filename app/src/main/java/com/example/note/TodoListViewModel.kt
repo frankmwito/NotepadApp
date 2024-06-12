@@ -8,13 +8,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
+
 
 
 class TodoListViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var todoItemRepository: TodoItemRepository =
-        AppDatabase.provideTodoItemRepository(application)
+    private val todoItemRepository: TodoItemRepository = AppDatabase.provideTodoItemRepository(application)
 
     private val _allTodoItems = MutableLiveData<List<TodoItem>>()
     val allTodoItems: LiveData<List<TodoItem>> get() = _allTodoItems
@@ -35,8 +36,6 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
     private fun loadAllTodoItems() {
         viewModelScope.launch(Dispatchers.Main) {
             todoItemRepository.getAllTodoItems().observeForever { items ->
-                Log.d("TodoListViewModel", "Loaded items: $items")
-
                 _allTodoItems.postValue(items)
                 _achievedTodoItems.postValue(items.filter { it.completed })
                 _overdueTodoItems.postValue(items.filter { it.alertTime?.isBefore(LocalDateTime.now()) == true && !it.completed })
@@ -44,7 +43,6 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-
 
     fun insert(todoItem: TodoItem) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -66,4 +64,25 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
             loadAllTodoItems()
         }
     }
+
+    fun searchTodoItems(query: String) {
+        viewModelScope.launch(Dispatchers.Main) {
+            val items = withContext(Dispatchers.IO) { todoItemRepository.searchTodoItems(query) }
+            _allTodoItems.postValue(items)
+            _achievedTodoItems.postValue(items.filter { it.completed })
+            _overdueTodoItems.postValue(items.filter { it.alertTime?.isBefore(LocalDateTime.now()) == true && !it.completed })
+            _noDateTodoItems.postValue(items.filter { it.alertTime == null && !it.completed })
+        }
+    }
+
+    fun sortTodoItems(sortBy: String, sortOrder: TodoItemRepository.SortOrder) {
+        viewModelScope.launch(Dispatchers.Main) {
+            val items = withContext(Dispatchers.IO) { todoItemRepository.sortTodoItems(sortBy, sortOrder) }
+            _allTodoItems.postValue(items)
+            _achievedTodoItems.postValue(items.filter { it.completed })
+            _overdueTodoItems.postValue(items.filter { it.alertTime?.isBefore(LocalDateTime.now()) == true && !it.completed })
+            _noDateTodoItems.postValue(items.filter { it.alertTime == null && !it.completed })
+        }
+    }
 }
+
