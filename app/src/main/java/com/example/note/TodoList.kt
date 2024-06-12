@@ -1,16 +1,22 @@
 package com.example.note
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,16 +25,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,8 +51,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -116,6 +132,8 @@ fun Todolist(viewModel: TodoListViewModel) {
         darkIcons = true
     )
 
+    var showSearchDialog by remember { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     val tabs = listOf("All", "Achieved", "Overdue", "No Date")
@@ -130,18 +148,25 @@ fun Todolist(viewModel: TodoListViewModel) {
                     Text(
                         text = "To-Do List",
                         fontSize = 24.sp,
-                        color = Color.Black,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { showSearchDialog = true }) {
                         Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                     }
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { showSortMenu = !showSortMenu }) {
                         Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
                     }
+                    SortDropdownMenu(
+                        expanded = showSortMenu,
+                        onDismissRequest = { showSortMenu = false },
+                        onSortSelected = { sortBy, sortOrder ->
+                            viewModel.sortTodoItems(sortBy, sortOrder)
+                            showSortMenu = false
+                        }
+                    )
                 }
             )
         },
@@ -152,16 +177,20 @@ fun Todolist(viewModel: TodoListViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.Transparent),
-                    contentColor = MaterialTheme.colorScheme.primary) {
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = { selectedTabIndex = index },
-                            text = { Text(title,
-                                fontSize = 16.sp,
-                                color = if (selectedTabIndex == index) Color.Black else Color.Gray,
-                                fontStyle = FontStyle.Italic,
-                                fontFamily = FontFamily.SansSerif)
+                            text = {
+                                Text(
+                                    title,
+                                    fontSize = 16.sp,
+                                    color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                                    fontStyle = FontStyle.Italic,
+                                    fontFamily = FontFamily.SansSerif
+                                )
                             }
                         )
                     }
@@ -171,7 +200,7 @@ fun Todolist(viewModel: TodoListViewModel) {
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(bottom = 72.dp)
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
                     ) {
                         when (selectedTabIndex) {
                             0 -> { // All
@@ -179,7 +208,7 @@ fun Todolist(viewModel: TodoListViewModel) {
                                     TodoItemCard(todoItem, viewModel)
                                 }
                             }
-                            1 -> { // Completed
+                            1 -> { // Achieved
                                 items(achievedTodoItems) { todoItem ->
                                     TodoItemCard(todoItem, viewModel)
                                 }
@@ -201,6 +230,92 @@ fun Todolist(viewModel: TodoListViewModel) {
             }
         }
     )
+
+    if (showSearchDialog) {
+        showSearchDialog(viewModel = viewModel, onDismiss = { showSearchDialog = false })
+    }
+}
+
+@Composable
+fun showSearchDialog(
+    viewModel: TodoListViewModel,
+    onDismiss: () -> Unit
+) {
+    var query by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                viewModel.searchTodoItems(query)
+                onDismiss()
+            }) {
+                Text("Search")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Search Todo Items") },
+        text = {
+            TextField(
+                value = query,
+                onValueChange = { query = it },
+                label = { Text("Search query") }
+            )
+        }
+    )
+}
+
+@Composable
+fun SortDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onSortSelected: (String, TodoItemRepository.SortOrder) -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("title", TodoItemRepository.SortOrder.ASC)
+                onDismissRequest()
+            },
+            text = {
+                Text("Sort by Title (ASC)")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("title", TodoItemRepository.SortOrder.DESC)
+                onDismissRequest()
+            },
+            text = {
+                Text("Sort by Title (DESC)")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("date", TodoItemRepository.SortOrder.ASC)
+                onDismissRequest()
+            },
+            text = {
+                Text("Sort by Date (ASC)")
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onSortSelected("date", TodoItemRepository.SortOrder.DESC)
+                onDismissRequest()
+            },
+            text = {
+                Text("Sort by Date (DESC)")
+            }
+        )
+    }
 }
 
 @Composable
@@ -218,7 +333,6 @@ fun FloatingActionButton() {
             onClick = { val intent = Intent(ctx, Newlist::class.java)
                 ctx.startActivity(intent)
             },
-            containerColor = Color(0xFFCCC2DC),
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -226,13 +340,38 @@ fun FloatingActionButton() {
 
 @Composable
 fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        showDeleteConfirmationDialog(
+            todoItem = todoItem,
+            onDeleteConfirm = {
+                viewModel.delete(todoItem)
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+
+    if (showEditDialog) {
+        showEditTodoItemDialog(
+            todoItem = todoItem,
+            onConfirm = { updatedItem ->
+                viewModel.update(updatedItem)
+                showEditDialog = false
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
+
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .background(color = Color.Transparent)
             .padding(16.dp)
             .fillMaxWidth()
-            .clickable { }
+            .clickable { showEditDialog = true }
     ) {
         Column {
             Row(
@@ -243,28 +382,174 @@ fun TodoItemCard(todoItem: TodoItem, viewModel: TodoListViewModel) {
                     selected = todoItem.completed,
                     onClick = { viewModel.update(todoItem.copy(completed = !todoItem.completed)) },
                     modifier = Modifier.padding(0.dp),
-                    colors = RadioButtonDefaults.colors(unselectedColor = Color.Black, selectedColor = Color(0xFFCCC2DC))
+                    colors = RadioButtonDefaults.colors(unselectedColor = Color.Black, selectedColor = Color.DarkGray)
                 )
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = todoItem.title,
+                    Text(
+                        text = todoItem.title,
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
-                        color = Color.Black)
+                        color = Color.Black
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = todoItem.description,
+                    Text(
+                        text = todoItem.description,
                         fontStyle = FontStyle.Normal,
                         fontFamily = FontFamily.SansSerif,
-                        color = Color.Black)
+                        color = Color.Black
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                    todoItem.alertTime?.format(formatter)?.let { Text(text = it,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.DarkGray) }
+                    todoItem.alertTime?.format(formatter)?.let {
+                        Text(
+                            text = it,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.DarkGray
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+                Row(
+                    modifier = Modifier
+                        .padding(5.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Red
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun showDeleteConfirmationDialog(
+    todoItem: TodoItem,
+    onDeleteConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDeleteConfirm) {
+                Text("Delete")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Delete Todo Item") },
+        text = { Text("Are you sure you want to delete this todo item?") }
+    )
+}
+
+@Composable
+fun showEditTodoItemDialog(
+    todoItem: TodoItem,
+    onConfirm: (TodoItem) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val title = remember { mutableStateOf(todoItem.title) }
+    val description = remember { mutableStateOf(todoItem.description) }
+    val alertTime = remember { mutableStateOf(todoItem.alertTime) }
+    var ringtoneUri by remember { mutableStateOf<Uri?>(Uri.parse(todoItem.ringtone)) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val updatedItem = todoItem.copy(
+                    title = title.value,
+                    description = description.value,
+                    alertTime = alertTime.value,
+                    ringtone = ringtoneUri?.toString() ?: ""
+                )
+                onConfirm(updatedItem)
+            }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Edit Todo Item") },
+        text = {
+            Column {
+                TextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
+                    label = { Text("Title") }
+                )
+                TextField(
+                    value = description.value,
+                    onValueChange = { description.value = it },
+                    label = { Text("Description") }
+                )
+                DateTimePicker(
+                    alertTime = alertTime,
+                    onDateSelected = { date -> alertTime.value = alertTime.value?.with(date) ?: date.atStartOfDay() },
+                    onTimeSelected = { time -> alertTime.value = alertTime.value?.with(time) ?: LocalDate.now().atTime(time) }
+                )
+                RingtonePicker(ringtoneUri) { uri -> ringtoneUri = uri }
+            }
+        }
+    )
+}
+
+@Composable
+fun DateTimePicker(
+    alertTime: MutableState<LocalDateTime?>,
+    onDateSelected: (LocalDate) -> Unit,
+    onTimeSelected: (LocalTime) -> Unit
+) {
+    val context = LocalContext.current
+    val datePickerDialog = createDatePickerDialog(context, onDateSelected)
+    val timePickerDialog = createTimePickerDialog(context, onTimeSelected)
+
+    Row {
+        FilledTonalButton(onClick = { datePickerDialog.show() }) {
+            Text("Pick Date")
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        FilledTonalButton(onClick = { timePickerDialog.show() }) {
+            Text("Pick Time")
+        }
+    }
+}
+
+@Composable
+fun RingtonePicker(currentRingtoneUri: Uri?, onRingtoneSelected: (Uri) -> Unit) {
+    val context = LocalContext.current
+    val ringtoneLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+            uri?.let { onRingtoneSelected(it) }
+        }
+    }
+
+    FilledTonalButton(onClick = {
+        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Ringtone")
+            putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, currentRingtoneUri)
+        }
+        ringtoneLauncher.launch(intent)
+    }) {
+        Text("Pick Ringtone")
     }
 }
 
