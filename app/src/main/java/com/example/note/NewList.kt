@@ -1,6 +1,7 @@
 package com.example.note
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.net.Uri
@@ -51,8 +52,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.Text
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.note.ui.theme.NoteTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -62,12 +67,12 @@ class Newlist : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NoteTheme {
-            newList(
-                viewModel = viewModel(),
-                onBackPressed = { onBackPressedDispatcher.onBackPressed() }
-            )
+                newList(
+                    viewModel = viewModel(),
+                    onBackPressed = { onBackPressedDispatcher.onBackPressed() }
+                )
+            }
         }
-    }
     }
 }
 
@@ -154,6 +159,26 @@ fun newList(viewModel: TodoListViewModel, onBackPressed: () -> Unit) {
             }
         }
     )
+}
+
+fun scheduleNotification(context: Context, todoItem: TodoItem) {
+    val delay = Duration.between(LocalDateTime.now(), todoItem.alertTime)
+    if (delay.isNegative) {
+        return // Do not schedule if the alert time is in the past
+    }
+
+    val notificationWork = OneTimeWorkRequestBuilder<NotificationWorker>()
+        .setInitialDelay(delay)
+        .setInputData(
+            Data.Builder()
+                .putString("title", todoItem.title)
+                .putString("description", todoItem.description)
+                .putString("ringtone", todoItem.ringtone)
+                .build()
+        )
+        .build()
+
+    WorkManager.getInstance(context).enqueue(notificationWork)
 }
 
 @Composable
