@@ -13,4 +13,6 @@
     <string name="title_activity_edit_note">EditNote</string>
     <string name="title_activity_task_add">TaskAdd</string>
     <string name="title_activity_newlist">Newlist</string>
+    <string name="title_activity_todo_list">TodoList</string>
+    <string name="title_activity_new_list">NewList</string>
 </resources>
