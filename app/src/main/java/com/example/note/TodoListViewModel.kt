@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 
 
 class TodoListViewModel(application: Application) : AndroidViewModel(application) {
-
     private val todoItemRepository: TodoItemRepository = AppDatabase.provideTodoItemRepository(application)
 
     private val _allTodoItems = MutableLiveData<List<TodoItem>>()
