@@ -57,6 +57,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -123,6 +124,7 @@ fun Todolist(viewModel: TodoListViewModel) {
     val achievedTodoItems by viewModel.achievedTodoItems.observeAsState(emptyList())
     val overdueTodoItems by viewModel.overdueTodoItems.observeAsState(emptyList())
     val noDateTodoItems by viewModel.noDateTodoItems.observeAsState(emptyList())
+
     val systemUiController = rememberSystemUiController()
 
     systemUiController.setStatusBarColor(
@@ -161,7 +163,7 @@ fun Todolist(viewModel: TodoListViewModel) {
                     IconButton(onClick = { showSortMenu = !showSortMenu }) {
                         Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
                     }
-                    SortdropdownMenu(
+                    SortDropdownMenu(
                         expanded = showSortMenu,
                         onDismissRequest = { showSortMenu = false },
                         onSortSelected = { sortBy, sortOrder ->
@@ -238,53 +240,98 @@ fun Todolist(viewModel: TodoListViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SortdropdownMenu(
+fun ShowSearchDialog(
+    viewModel: TodoListViewModel,
+    onDismissRequest: () -> Unit
+) {
+    var query by remember { mutableStateOf("") }
+    val searchResults by viewModel.allTodoItems.observeAsState(emptyList())
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(text = "Search to-do list") },
+                    navigationIcon = {
+                        IconButton(onClick = { onDismissRequest }) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            paddingValues
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                TextField(
+                    value = query,
+                    onValueChange = {
+                        query = it
+                        viewModel.searchTodoItems(query)
+                    },
+                    label = { Text("Search query") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                LazyColumn {
+                    items(searchResults) { todoItem ->
+                        TodoItemCard(todoItem = todoItem, viewModel = viewModel)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SortDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    onSortSelected: (String, TodoItemRepository.SortOrder) -> Unit) {
+    onSortSelected: (String, TodoItemRepository.SortOrder) -> Unit
+) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        DropdownMenuItem(
-            onClick = {
-                onSortSelected("title", TodoItemRepository.SortOrder.ASC)
-                onDismissRequest()
-            },
-            text = {
-                Text("Sort by Title (ASC)")
-            }
+        DropdownMenuItem(onClick =
+        {
+            onSortSelected("title", TodoItemRepository.SortOrder.ASC)
+            onDismissRequest()
+        },
+            text = {Text("Sort by Title (A-Z)")}
+
         )
-        DropdownMenuItem(
-            onClick = {
-                onSortSelected("title", TodoItemRepository.SortOrder.DESC)
-                onDismissRequest()
-            },
-            text = {
-                Text("Sort by Title (DESC)")
-            }
+        DropdownMenuItem(onClick = {
+            onSortSelected("title", TodoItemRepository.SortOrder.DESC)
+            onDismissRequest()
+        },
+                text = {Text("Sort by Title (Z-A)")}
+
+            )
+        DropdownMenuItem(onClick = {
+            onSortSelected("date", TodoItemRepository.SortOrder.ASC)
+            onDismissRequest()
+        },
+            text = {Text("Sort by Date (Ascending)")}
+
         )
-        DropdownMenuItem(
-            onClick = {
-                onSortSelected("date", TodoItemRepository.SortOrder.ASC)
-                onDismissRequest()
-            },
-            text = {
-                Text("Sort by Date (ASC)")
-            }
-        )
-        DropdownMenuItem(
-            onClick = {
-                onSortSelected("date", TodoItemRepository.SortOrder.DESC)
-                onDismissRequest()
-            },
-            text = {
-                Text("Sort by Date (DESC)")
-            }
-        )
+        DropdownMenuItem(onClick = {
+            onSortSelected("date", TodoItemRepository.SortOrder.DESC)
+            onDismissRequest()
+        },
+            text = { Text("Sort by Date (Descending)")}
+            )
     }
 }
+
+
 
 @Composable
 fun FloatingActionbutton() {
@@ -553,57 +600,11 @@ fun showDeleteConfirmationDialog(todoItem: TodoItem, onDeleteConfirm: () -> Unit
         text = { Text("Are you sure you want to delete this todo item?") }
     )
 }
+        fun LocalDateTime.withDate(date: LocalDate): LocalDateTime =
+            this.withYear(date.year).withMonth(date.monthValue).withDayOfMonth(date.dayOfMonth)
 
+        fun LocalDateTime.withTime(time: LocalTime): LocalDateTime =
+            this.withHour(time.hour).withMinute(time.minute)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ShowSearchDialog(
-    viewModel: TodoListViewModel,
-    onDismissRequest: () -> Unit
-) {
-    var query by remember { mutableStateOf("") }
-
-    Dialog(onDismissRequest = onDismissRequest) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(text = "Search to-do list") },
-                    navigationIcon = {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
-                )
-            }
-        ) { paddingValues ->
-            paddingValues
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                TextField(
-                    value = query,
-                    onValueChange = {
-                        query = it
-                        viewModel.searchTodoItems(query)
-                    },
-                    label = { Text("Search query") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-
-
-    fun LocalDateTime.withDate(date: LocalDate): LocalDateTime =
-        this.withYear(date.year).withMonth(date.monthValue).withDayOfMonth(date.dayOfMonth)
-
-    fun LocalDateTime.withTime(time: LocalTime): LocalDateTime =
-        this.withHour(time.hour).withMinute(time.minute)
-}
 
 
