@@ -51,3 +51,4 @@ interface TodoItemDao {
     @Query("SELECT * FROM todoitems ORDER BY alertTime DESC")
     fun sortTodoItemsByDateDesc(): LiveData<List<TodoItem>>
 }
+
