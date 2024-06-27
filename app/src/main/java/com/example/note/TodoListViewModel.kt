@@ -28,6 +28,9 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
     private val _noDateTodoItems = MutableLiveData<List<TodoItem>>()
     val noDateTodoItems: LiveData<List<TodoItem>> get() = _noDateTodoItems
 
+    private val _searchResults = MutableLiveData<List<TodoItem>>()
+    val searchResults: LiveData<List<TodoItem>> get() = _searchResults
+
     init {
         loadAllTodoItems()
     }
@@ -67,10 +70,7 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
     fun searchTodoItems(query: String) {
         viewModelScope.launch(Dispatchers.Main) {
             val items = withContext(Dispatchers.IO) { todoItemRepository.searchTodoItems(query) }
-            _allTodoItems.postValue(items)
-            _achievedTodoItems.postValue(items.filter { it.completed })
-            _overdueTodoItems.postValue(items.filter { it.alertTime?.isBefore(LocalDateTime.now()) == true && !it.completed })
-            _noDateTodoItems.postValue(items.filter { it.alertTime == null && !it.completed })
+            _searchResults.postValue(items)
         }
     }
 
@@ -84,4 +84,3 @@ class TodoListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 }
-
