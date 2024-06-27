@@ -236,26 +236,27 @@ fun Todolist(viewModel: TodoListViewModel) {
     )
 
     if (showSearchDialog) {
-        ShowSearchDialog(viewModel = viewModel, onDismissRequest = { showSearchDialog = false })
+        ShowSearchDialog(viewModel = viewModel, onBackPress = { showSearchDialog = false })
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowSearchDialog(
     viewModel: TodoListViewModel,
-    onDismissRequest: () -> Unit
+    onBackPress: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
-    val searchResults by viewModel.allTodoItems.observeAsState(emptyList())
+    val searchResults by viewModel.searchResults.observeAsState(emptyList())
 
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = onBackPress) {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text(text = "Search to-do list") },
                     navigationIcon = {
-                        IconButton(onClick = { onDismissRequest }) {
+                        IconButton(onClick = { onBackPress() }) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "Back"
@@ -264,11 +265,11 @@ fun ShowSearchDialog(
                     }
                 )
             }
-        ) { paddingValues ->
-            paddingValues
+        ) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(padding)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 TextField(
@@ -280,6 +281,7 @@ fun ShowSearchDialog(
                     label = { Text("Search query") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 LazyColumn {
                     items(searchResults) { todoItem ->
                         TodoItemCard(todoItem = todoItem, viewModel = viewModel)

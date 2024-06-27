@@ -25,26 +25,23 @@ class TodoItemRepositoryImpl(private val todoItemDao: TodoItemDao) : TodoItemRep
     }
 
     override suspend fun searchTodoItems(query: String): List<TodoItem> {
-        return todoItemDao.searchTodoItems(query).value ?: emptyList()
+        return todoItemDao.searchTodoItems(query)
     }
 
-    override suspend fun sortTodoItems(
-        sortBy: String,
-        sortOrder: TodoItemRepository.SortOrder
-    ): List<TodoItem> {
+    override suspend fun sortTodoItems(sortBy: String, sortOrder: TodoItemRepository.SortOrder): List<TodoItem> {
         return when (sortBy) {
             "title" -> {
                 if (sortOrder == TodoItemRepository.SortOrder.ASC) {
-                    todoItemDao.sortTodoItemsByTitleAsc().value ?: emptyList()
+                    todoItemDao.sortTodoItemsByTitleAsc()
                 } else {
-                    todoItemDao.sortTodoItemsByTitleDesc().value ?: emptyList()
+                    todoItemDao.sortTodoItemsByTitleDesc()
                 }
             }
             "date" -> {
-                if (sortOrder == TodoItemRepository.SortOrder.DESC) {
-                    todoItemDao.sortTodoItemsByDateAsc().value ?: emptyList()
+                if (sortOrder == TodoItemRepository.SortOrder.ASC) {
+                    todoItemDao.sortTodoItemsByDateAsc()
                 } else {
-                    todoItemDao.sortTodoItemsByDateDesc().value ?: emptyList()
+                    todoItemDao.sortTodoItemsByDateDesc()
                 }
             }
             else -> throw IllegalArgumentException("Invalid sort by field")
