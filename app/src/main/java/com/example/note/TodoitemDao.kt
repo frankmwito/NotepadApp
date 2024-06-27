@@ -37,18 +37,18 @@ interface TodoItemDao {
     fun getNoDateTodoItems(): LiveData<List<TodoItem>>
 
     @Query("SELECT * FROM todoitems WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%'")
-    fun searchTodoItems(query: String): LiveData<List<TodoItem>>
+    suspend fun searchTodoItems(query: String): List<TodoItem> // Change to List<TodoItem>
 
     @Query("SELECT * FROM todoitems ORDER BY title ASC")
-    fun sortTodoItemsByTitleAsc(): LiveData<List<TodoItem>>
+    suspend fun sortTodoItemsByTitleAsc(): List<TodoItem> // Change to List<TodoItem>
 
     @Query("SELECT * FROM todoitems ORDER BY title DESC")
-    fun sortTodoItemsByTitleDesc(): LiveData<List<TodoItem>>
+    suspend fun sortTodoItemsByTitleDesc(): List<TodoItem> // Change to List<TodoItem>
 
     @Query("SELECT * FROM todoitems ORDER BY alertTime ASC")
-    fun sortTodoItemsByDateAsc(): LiveData<List<TodoItem>>
+    suspend fun sortTodoItemsByDateAsc(): List<TodoItem> // Change to List<TodoItem>
 
     @Query("SELECT * FROM todoitems ORDER BY alertTime DESC")
-    fun sortTodoItemsByDateDesc(): LiveData<List<TodoItem>>
+    suspend fun sortTodoItemsByDateDesc(): List<TodoItem> // Change to List<TodoItem>
 }
 

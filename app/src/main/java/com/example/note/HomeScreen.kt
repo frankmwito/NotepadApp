@@ -324,7 +324,7 @@ fun FullScreenSearchDialog(
                     label = { Text("Search") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+
                 LazyColumn {
                     items(searchResults) { note ->
                         NoteCard(note = note, viewModel = viewModel)
