@@ -86,7 +86,6 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
             )
 
         notificationManager.notify(notificationId, notificationBuilder.build())
-
         // Play Ringtone
         ringtoneUri?.let {
             RingtonePlayer.play(applicationContext, it)
