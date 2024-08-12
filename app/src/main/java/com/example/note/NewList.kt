@@ -60,6 +60,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 
 class Newlist : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -168,7 +169,7 @@ fun scheduleNotification(context: Context, todoItem: TodoItem) {
     }
 
     val notificationWork = OneTimeWorkRequestBuilder<NotificationWorker>()
-        .setInitialDelay(delay)
+        .setInitialDelay(delay.toMillis(), TimeUnit.MILLISECONDS) // Ensuring the correct delay type
         .setInputData(
             Data.Builder()
                 .putString("title", todoItem.title)
