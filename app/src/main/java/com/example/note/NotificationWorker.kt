@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -24,24 +23,24 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         return Result.success()
     }
 
-    private fun showNotification(title: String?, description: String?, ringtoneUri: Uri?, ringtoneUriString: String?) {
+    private fun showNotification(title: String?, noteDescription: String?, ringtoneUri: Uri?, ringtoneUriString: String?) {
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create a notification channel if it doesn't exist
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel("todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
-                this.description = "Channel for to-do notifications"
-                enableLights(true)
-                lightColor = Color.RED
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel("todo_channel", "To-Do Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
+            this.description = "Channel for to-do notifications"
+            enableLights(true)
+            lightColor = Color.RED
+            enableVibration(true)
         }
+        notificationManager.createNotificationChannel(channel)
+
+        val notificationId = 1 // Use a unique ID for each notification
 
         // Stop Ringtone Intent
         val stopRingtoneIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
             action = "STOP_RINGTONE"
-            putExtra("notificationId", 1)
+            putExtra("notificationId", notificationId)
         }
         val stopRingtonePendingIntent = PendingIntent.getBroadcast(
             applicationContext,
@@ -53,9 +52,9 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         // Remind Later Intent
         val remindLaterIntent = Intent(applicationContext, NotificationReceiver::class.java).apply {
             action = "REMIND_LATER"
-            putExtra("notificationId", 1)
+            putExtra("notificationId", notificationId)
             putExtra("title", title)
-            putExtra("description", description)
+            putExtra("description", noteDescription)  // Updated to use noteDescription
             putExtra("ringtone", ringtoneUriString)
         }
         val remindLaterPendingIntent = PendingIntent.getBroadcast(
@@ -68,7 +67,7 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
         // Build Notification
         val notificationBuilder = NotificationCompat.Builder(applicationContext, "todo_channel")
             .setContentTitle(title)
-            .setContentText(description)
+            .setContentText(noteDescription)  // Updated to use noteDescription
             .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -86,14 +85,12 @@ class NotificationWorker(context: Context, params: WorkerParameters) : Worker(co
                 ), true
             )
 
-        notificationManager.notify(1, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
 
         // Play Ringtone
         ringtoneUri?.let {
             RingtonePlayer.play(applicationContext, it)
         }
     }
+
 }
-
-
-
